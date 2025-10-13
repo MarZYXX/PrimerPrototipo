@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.LoginActivity">
+
+    <TextView
+        android:id="@+id/tvTituloLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tvLogin"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="32dp"/>
+
+    <TextView
+        android:id="@+id/tvBienvenida"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tvBienvenidatxt"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTituloLogin"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="90dp"/>
+
+    <TextView
+        android:id="@+id/tvBienvenida2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ingrese_su_cuenta"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/tvBienvenida"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="15dp"/>
+
+    <TextView
+        android:id="@+id/tvCorero"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Correo:"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/tvBienvenida2"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="40dp"/>
+
+    <EditText
+        android:id="@+id/etCorreo"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:hint="@string/email"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/tvCorero"
+        app:layout_constraintStart_toStartOf="@id/tvCorero"/>
+
+    <TextView
+        android:id="@+id/tvContraseña"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Contraseña:"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/etCorreo"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="40dp"/>
+
+    <EditText
+        android:id="@+id/etContraseña"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:hint="@string/password"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/tvContraseña"
+        app:layout_constraintStart_toStartOf="@id/tvContraseña"/>
+
+    <Button
+        android:id="@+id/buttonLogin"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etContraseña" />
+
+    <TextView
+        android:id="@+id/tvMensajeCrear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¿No tienes una cuenta?"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/buttonLogin"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="40dp"/>
+
+    <TextView
+        android:id="@+id/tvRegistrarse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/click_registrarse"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintStart_toEndOf="@id/tvMensajeCrear"
+        app:layout_constraintTop_toTopOf="@id/tvMensajeCrear" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/buttonLogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

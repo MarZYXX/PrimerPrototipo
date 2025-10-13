@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutRegistro"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".view.RegistroActivity">
+
+    <TextView
+        android:id="@+id/tvTituloRegistro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Crear cuenta"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:id="@+id/tvSubtituloRegistro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Complete los siguientes campos para registrarse"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTituloRegistro"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/tvNombre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nombre:"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtituloRegistro"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="40dp" />
+
+    <EditText
+        android:id="@+id/etNombre"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/registro_nombre"
+        android:inputType="textPersonName"
+        app:layout_constraintTop_toBottomOf="@id/tvNombre"
+        app:layout_constraintStart_toStartOf="@id/tvNombre"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/tvCorreo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Correo:"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/etNombre"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="40dp" />
+
+    <EditText
+        android:id="@+id/etCorreoRegistro"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/registro_correo"
+        android:inputType="textEmailAddress"
+        app:layout_constraintTop_toBottomOf="@id/tvCorreo"
+        app:layout_constraintStart_toStartOf="@id/tvCorreo"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/tvContraseña"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Contraseña:"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/etCorreoRegistro"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="40dp" />
+
+    <EditText
+        android:id="@+id/etContraseñaRegistro"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/registro_password"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/tvContraseña"
+        app:layout_constraintStart_toStartOf="@id/tvContraseña"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/tvConfirmarContraseña"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirmar contraseña:"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/etContraseñaRegistro"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="40dp" />
+
+    <EditText
+        android:id="@+id/etConfirmarContraseña"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/confirmar_password"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/tvConfirmarContraseña"
+        app:layout_constraintStart_toStartOf="@id/tvConfirmarContraseña"
+        android:layout_marginTop="10dp" />
+
+    <Button
+        android:id="@+id/buttonRegistrar"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:text="@string/crear_cuenta"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/etConfirmarContraseña"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:id="@+id/tvVolverLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¿Ya tienes cuenta? Inicia sesión"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/buttonRegistrar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="30dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

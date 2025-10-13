@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">PrimerPrototipo</string>
+    <string name="tvLogin">Iniciar sesión</string>
+    <string name="tvBienvenidatxt">¡Bienvenido a GPS-BUS!</string>
+    <string name="ingrese_su_cuenta">Ingrese su cuenta:</string>
+    <string name="email">Ingrese su email</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="click_registrarse">Registrarse</string>
+    <string name="registro_nombre">Ingrese su nombre</string>
+    <string name="registro_correo">usuario@gpsbus.com</string>
+    <string name="registro_password">Crea una contraseña</string>
+    <string name="confirmar_password">Repite tu contraseña</string>
+    <string name="crear_cuenta">Crear cuenta</string>
+    <string name="rastrear_autobus">Rastrear Autobús</string>
+</resources>
