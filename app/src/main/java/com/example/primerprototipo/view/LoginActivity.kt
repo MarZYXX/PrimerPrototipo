@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun irAMapa() {
-        val intent = Intent(this, MapaActivity::class.java)
+        val intent = Intent(this, TempMove::class.java)
         startActivity(intent)
         finish()
     }
