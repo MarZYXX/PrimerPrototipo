@@ -8,13 +8,6 @@ class RegistroViewModel : ViewModel() {
     private val _registroExitoso = MutableLiveData<Boolean>()
     val registroExitoso: LiveData<Boolean> get() = _registroExitoso
 
-    fun validarRegistro(nombre: String, correo: String, contraseña: String, confirmar: String): Boolean {
-        if (nombre.isEmpty() || correo.isEmpty() || contraseña.isEmpty() || confirmar.isEmpty())
-            return false
-
-        return contraseña == confirmar
-    }
-
     private val _errorMensaje = MutableLiveData<String>()
     val errorMensaje: LiveData<String> get() = _errorMensaje
 

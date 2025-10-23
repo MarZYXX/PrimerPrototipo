@@ -27,6 +27,26 @@ class LoginViewModel : ViewModel() {
         }
 
         _isLoading.value = true
+
+        // Simular una llamada asíncrona
+        Thread {
+            try {
+                Thread.sleep(1000) // Simular delay de red
+
+                // Lógica de autenticación REAL
+                val usuario = UserRepository.findUserByEmail(correo)
+
+                if (usuario != null && usuario.contrasena == contrasena) {
+                    _loginResult.postValue(LoginResult.Success(usuario))
+                } else {
+                    _loginResult.postValue(LoginResult.Error("Correo o contraseña incorrectos"))
+                }
+            } catch (e: Exception) {
+                _loginResult.postValue(LoginResult.Error("Error de conexión"))
+            } finally {
+                _isLoading.postValue(false)
+            }
+        }.start()
     }
 
     sealed class LoginResult {
