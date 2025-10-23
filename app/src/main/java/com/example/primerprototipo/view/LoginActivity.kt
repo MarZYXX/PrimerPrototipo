@@ -3,72 +3,76 @@ package com.example.primerprototipo.view
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.primerprototipo.R
-import com.example.primerprototipo.viewmodel.LoginViewModel
+import com.example.primerprototipo.model.Usuario
+import com.example.primerprototipo.viewmodel.UserRepository
 
 class LoginActivity : AppCompatActivity() {
 
-    // 🔹 Declaración modular de vistas (afuera de onCreate)
+    // Variables globales
     private lateinit var etCorreo: EditText
-    private lateinit var etContraseña: EditText
+    private lateinit var etContrasena: EditText
     private lateinit var btnLogin: Button
     private lateinit var tvRegistrarse: TextView
-    private lateinit var tvError: TextView
     private lateinit var progressBar: ProgressBar
-
-    // 🔹 ViewModel
-    private val viewModel: LoginViewModel by viewModels()
+    private lateinit var tvError: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        inicializarComponentes()
-        configurarEventos()
-        observarCambios()
-    }
-
-    // 🔹 Inicializa vistas solo una vez
-    private fun inicializarComponentes() {
+        // Inicialización
         etCorreo = findViewById(R.id.etCorreo)
-        etContraseña = findViewById(R.id.etContraseña)
+        etContrasena = findViewById(R.id.etContrasena)
         btnLogin = findViewById(R.id.buttonLogin)
         tvRegistrarse = findViewById(R.id.tvRegistrarse)
-        tvError = findViewById(R.id.tvError)
         progressBar = findViewById(R.id.progressBar)
-    }
+        tvError = findViewById(R.id.tvError)
 
-    // 🔹 Configura listeners y acciones de botones
-    private fun configurarEventos() {
+        // Evento login
         btnLogin.setOnClickListener {
-            val correo = etCorreo.text.toString()
-            val contraseña = etContraseña.text.toString()
-            viewModel.login(correo, contraseña)
+            realizarLogin()
         }
 
+        // Ir a registro
         tvRegistrarse.setOnClickListener {
-            startActivity(Intent(this, RegistroActivity::class.java))
+            val intent = Intent(this, RegistroActivity::class.java)
+            startActivity(intent)
         }
     }
 
-    // 🔹 Observa los cambios del ViewModel
-    private fun observarCambios() {
-        viewModel.loginSuccess.observe(this) { success ->
-            if (success) {
-                startActivity(Intent(this, MapaActivity::class.java))
-                finish()
-            }
+    private fun realizarLogin() {
+        val correo = etCorreo.text.toString().trim()
+        val contrasena = etContrasena.text.toString().trim()
+
+        if (correo.isEmpty() || contrasena.isEmpty()) {
+            mostrarError("Por favor, llena todos los campos")
+            return
         }
 
-        viewModel.loading.observe(this) { isLoading ->
-            progressBar.visibility = if (isLoading) ProgressBar.VISIBLE else ProgressBar.GONE
-        }
+        progressBar.visibility = ProgressBar.VISIBLE
 
-        viewModel.errorMessage.observe(this) { error ->
-            tvError.text = error
-            tvError.visibility = if (error.isNotEmpty()) TextView.VISIBLE else TextView.GONE
+        val usuario = UserRepository.findUserByEmail(correo)
+
+        if (usuario != null && usuario.contrasena == contrasena) {
+            progressBar.visibility = ProgressBar.GONE
+            tvError.visibility = TextView.GONE
+            irAMapa()
+        } else {
+            progressBar.visibility = ProgressBar.GONE
+            mostrarError("Correo o contraseña incorrectos")
         }
+    }
+
+    private fun irAMapa() {
+        val intent = Intent(this, MapaActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun mostrarError(mensaje: String) {
+        tvError.text = mensaje
+        tvError.visibility = TextView.VISIBLE
     }
 }

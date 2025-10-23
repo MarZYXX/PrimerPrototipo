@@ -62,7 +62,7 @@
         app:layout_constraintStart_toStartOf="@id/tvCorero"/>
 
     <TextView
-        android:id="@+id/tvContraseña"
+        android:id="@+id/tvContrasena"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Contraseña:"
@@ -73,14 +73,14 @@
         android:layout_marginStart="40dp"/>
 
     <EditText
-        android:id="@+id/etContraseña"
+        android:id="@+id/etContrasena"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:hint="@string/password"
         android:inputType="text"
-        app:layout_constraintTop_toBottomOf="@id/tvContraseña"
-        app:layout_constraintStart_toStartOf="@id/tvContraseña"/>
+        app:layout_constraintTop_toBottomOf="@id/tvContrasena"
+        app:layout_constraintStart_toStartOf="@id/tvContrasena"/>
 
     <Button
         android:id="@+id/buttonLogin"
@@ -90,7 +90,7 @@
         android:text="@string/login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etContraseña" />
+        app:layout_constraintTop_toBottomOf="@id/etContrasena" />
 
     <TextView
         android:id="@+id/tvMensajeCrear"

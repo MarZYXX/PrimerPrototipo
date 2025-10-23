@@ -86,7 +86,7 @@
         android:layout_marginStart="40dp" />
 
     <EditText
-        android:id="@+id/etContraseñaRegistro"
+        android:id="@+id/etContrasenaRegistro"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:hint="@string/registro_password"
@@ -96,24 +96,24 @@
         android:layout_marginTop="10dp" />
 
     <TextView
-        android:id="@+id/tvConfirmarContraseña"
+        android:id="@+id/tvConfirmarContrasena"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Confirmar contraseña:"
         android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@id/etContraseñaRegistro"
+        app:layout_constraintTop_toBottomOf="@id/etContrasenaRegistro"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="30dp"
         android:layout_marginStart="40dp" />
 
     <EditText
-        android:id="@+id/etConfirmarContraseña"
+        android:id="@+id/etConfirmarContrasena"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:hint="@string/confirmar_password"
         android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@id/tvConfirmarContraseña"
-        app:layout_constraintStart_toStartOf="@id/tvConfirmarContraseña"
+        app:layout_constraintTop_toBottomOf="@id/tvConfirmarContrasena"
+        app:layout_constraintStart_toStartOf="@id/tvConfirmarContrasena"
         android:layout_marginTop="10dp" />
 
     <Button
@@ -122,7 +122,7 @@
         android:layout_height="wrap_content"
         android:text="@string/crear_cuenta"
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/etConfirmarContraseña"
+        app:layout_constraintTop_toBottomOf="@id/etConfirmarContrasena"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="40dp" />
