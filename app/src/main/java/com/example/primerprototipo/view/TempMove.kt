@@ -32,14 +32,14 @@ class TempMove : AppCompatActivity() {
             startActivity(intent)
         }
 
-//        btnAdmin.setOnClickListener {
-//            val intent = Intent(this, AdminActivity::class.java)
-//            startActivity(intent)
-//        }
-//
-//        btnSuperAdmin.setOnClickListener {
-//            val intent = Intent(this, SuperAdminActivity::class.java)
-//            startActivity(intent)
-//        }
+        btnAdmin.setOnClickListener {
+            val intent = Intent(this, AdminActivity::class.java)
+            startActivity(intent)
+        }
+
+        btnSuperAdmin.setOnClickListener {
+            val intent = Intent(this, SuperAdminActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
