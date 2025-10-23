@@ -18,7 +18,13 @@ class LoginViewModel : ViewModel() {
     fun login(correo: String, contraseña: String) {
         _loading.value = true
 
-        // Simulación de validación
+        if (correo.isEmpty() || contraseña.isEmpty()) {
+            _errorMessage.value = "Por favor llena todos los campos"
+            _loading.value = false
+            return
+        }
+
+        // Simulación de login
         if (correo == "admin@gmail.com" && contraseña == "1234") {
             _loginSuccess.value = true
             _errorMessage.value = ""
