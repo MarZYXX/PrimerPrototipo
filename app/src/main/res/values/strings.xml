@@ -13,4 +13,11 @@
     <string name="confirmar_password">Repite tu contraseña</string>
     <string name="crear_cuenta">Crear cuenta</string>
     <string name="rastrear_autobus">Rastrear Autobús</string>
+    <string name="bienvenido_chofer_007">Bienvenido chofer 007</string>
+    <string name="tiempo_de_salida">Tiempo de salida:</string>
+    <string name="pasajeros">pasajeros:</string>
+    <string name="_10">10</string>
+    <string name="siguiente_parada">Siguiente parada:</string>
+    <string name="arroyo_hondo">Arroyo hondo</string>
+    <string name="temporal_para_dirigir_a_otras_actividades_de_usuarios">Temporal para dirigir a otras actividades de usuarios</string>
 </resources>
