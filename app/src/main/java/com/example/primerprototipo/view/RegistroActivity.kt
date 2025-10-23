@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.primerprototipo.R
-import com.example.primerprototipo.model.Usuario
-import com.example.primerprototipo.viewmodel.UserRepository
+import com.example.primerprototipo.viewmodel.RegistroViewModel
 
 class RegistroActivity : AppCompatActivity() {
 
@@ -17,10 +17,16 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var btnRegistrar: Button
     private lateinit var tvVolverLogin: TextView
 
+    private lateinit var viewModel: RegistroViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registro)
 
+        // Inicializar ViewModel
+        viewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
+
+        // Inicializar vistas
         etNombre = findViewById(R.id.etNombre)
         etCorreo = findViewById(R.id.etCorreoRegistro)
         etContrasena = findViewById(R.id.etContrasenaRegistro)
@@ -28,41 +34,33 @@ class RegistroActivity : AppCompatActivity() {
         btnRegistrar = findViewById(R.id.buttonRegistrar)
         tvVolverLogin = findViewById(R.id.tvVolverLogin)
 
+        // Observar el resultado del registro
+        viewModel.registroExitoso.observe(this) { exitoso ->
+            if (exitoso) {
+                Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show()
+                irALogin()
+            }
+        }
+
+        // Observar mensajes de error
+        viewModel.errorMensaje.observe(this) { mensaje ->
+            if (mensaje.isNotEmpty()) {
+                Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show()
+            }
+        }
+
         btnRegistrar.setOnClickListener {
-            registrarUsuario()
+            val nombre = etNombre.text.toString().trim()
+            val correo = etCorreo.text.toString().trim()
+            val pass = etContrasena.text.toString().trim()
+            val confirmar = etConfirmar.text.toString().trim()
+
+            viewModel.registrarUsuario(nombre, correo, pass, confirmar)
         }
 
         tvVolverLogin.setOnClickListener {
             irALogin()
         }
-    }
-
-    private fun registrarUsuario() {
-        val nombre = etNombre.text.toString().trim()
-        val correo = etCorreo.text.toString().trim()
-        val pass = etContrasena.text.toString().trim()
-        val confirmar = etConfirmar.text.toString().trim()
-
-        if (nombre.isEmpty() || correo.isEmpty() || pass.isEmpty() || confirmar.isEmpty()) {
-            Toast.makeText(this, "Por favor llena todos los campos", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (pass != confirmar) {
-            Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (UserRepository.findUserByEmail(correo) != null) {
-            Toast.makeText(this, "El correo ya está registrado", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Registro exitoso
-        val nuevoUsuario = Usuario(nombre, correo, pass)
-        UserRepository.addUser(nuevoUsuario)
-        Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show()
-        irALogin()
     }
 
     private fun irALogin() {
