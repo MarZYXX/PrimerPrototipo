@@ -43,23 +43,26 @@ class RegistroActivity : AppCompatActivity() {
         val pass = etContrasena.text.toString().trim()
         val confirmar = etConfirmar.text.toString().trim()
 
-        when {
-            nombre.isEmpty() || correo.isEmpty() || pass.isEmpty() || confirmar.isEmpty() -> {
-                Toast.makeText(this, "Por favor llena todos los campos", Toast.LENGTH_SHORT).show()
-            }
-            pass != confirmar -> {
-                Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-            }
-            UserRepository.findUserByEmail(correo) != null -> {
-                Toast.makeText(this, "El correo ya está registrado", Toast.LENGTH_SHORT).show()
-            }
-            else -> {
-                val nuevoUsuario = Usuario(nombre, correo, pass)
-                UserRepository.addUser(nuevoUsuario)
-                Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show()
-                irALogin()
-            }
+        if (nombre.isEmpty() || correo.isEmpty() || pass.isEmpty() || confirmar.isEmpty()) {
+            Toast.makeText(this, "Por favor llena todos los campos", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        if (pass != confirmar) {
+            Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (UserRepository.findUserByEmail(correo) != null) {
+            Toast.makeText(this, "El correo ya está registrado", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Registro exitoso
+        val nuevoUsuario = Usuario(nombre, correo, pass)
+        UserRepository.addUser(nuevoUsuario)
+        Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show()
+        irALogin()
     }
 
     private fun irALogin() {
