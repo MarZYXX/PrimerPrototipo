@@ -25,6 +25,7 @@ class GestionCuentasActivity : AppCompatActivity() {
     private lateinit var btnActualizar: Button
     private lateinit var btnEliminar: Button
     private lateinit var tvMensaje: TextView
+    private lateinit var btnFinalizar: Button
 
     private lateinit var usuarioActual: Usuario
     private var usuarioEditando: Usuario? = null
@@ -40,6 +41,8 @@ class GestionCuentasActivity : AppCompatActivity() {
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
 
+        initViewModel()
+
         etCorreoBusqueda = findViewById(R.id.editTextCorreo)
         etNombre = findViewById(R.id.etNombre)
         etCorreo = findViewById(R.id.etCorreo)
@@ -50,6 +53,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         btnActualizar = findViewById(R.id.btnActualizar)
         btnEliminar = findViewById(R.id.btnEliminar)
         tvMensaje = findViewById(R.id.tvMensaje)
+        btnFinalizar = findViewById(R.id.btnFinalizar)
 
         val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
 
@@ -72,10 +76,13 @@ class GestionCuentasActivity : AppCompatActivity() {
             eliminarUsuario()
         }
 
+        btnFinalizar.setOnClickListener {
+            finish()
+        }
+
         btnActualizar.isEnabled = false
         btnEliminar.isEnabled = false
 
-        initViewModel()
     }
 
 
