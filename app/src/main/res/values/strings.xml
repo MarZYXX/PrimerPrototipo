@@ -20,4 +20,7 @@
     <string name="siguiente_parada">Siguiente parada:</string>
     <string name="arroyo_hondo">Arroyo hondo</string>
     <string name="temporal_para_dirigir_a_otras_actividades_de_usuarios">Temporal para dirigir a otras actividades de usuarios</string>
+    <string name="autobus">Autobus</string>
+    <string name="gestionar_cuentas">Gestionar cuentas</string>
+    <string name="buscar_usuario_por_correo">Buscar usuario por correo:</string>
 </resources>
