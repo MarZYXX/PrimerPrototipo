@@ -40,12 +40,6 @@ class GestionCuentasActivity : AppCompatActivity() {
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
 
-        initViews()
-        initViewModel()
-        setupUI()
-    }
-
-    private fun initViews() {
         etCorreoBusqueda = findViewById(R.id.editTextCorreo)
         etNombre = findViewById(R.id.etNombre)
         etCorreo = findViewById(R.id.etCorreo)
@@ -56,7 +50,34 @@ class GestionCuentasActivity : AppCompatActivity() {
         btnActualizar = findViewById(R.id.btnActualizar)
         btnEliminar = findViewById(R.id.btnEliminar)
         tvMensaje = findViewById(R.id.tvMensaje)
+
+        val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
+
+        viewModel.cargarRolesDisponibles(esSuperAdmin)
+
+        btnBuscar.setOnClickListener {
+            val correo = etCorreoBusqueda.text.toString().trim()
+            viewModel.buscarUsuario(correo)
+        }
+
+        btnCrear.setOnClickListener {
+            crearUsuario()
+        }
+
+        btnActualizar.setOnClickListener {
+            actualizarUsuario()
+        }
+
+        btnEliminar.setOnClickListener {
+            eliminarUsuario()
+        }
+
+        btnActualizar.isEnabled = false
+        btnEliminar.isEnabled = false
+
+        initViewModel()
     }
+
 
     private fun initViewModel() {
         viewModel = ViewModelProvider(this)[GestionarCuentasViewModel::class.java]
@@ -91,31 +112,6 @@ class GestionCuentasActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupUI() {
-        val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
-
-        viewModel.cargarRolesDisponibles(esSuperAdmin)
-
-        btnBuscar.setOnClickListener {
-            val correo = etCorreoBusqueda.text.toString().trim()
-            viewModel.buscarUsuario(correo)
-        }
-
-        btnCrear.setOnClickListener {
-            crearUsuario()
-        }
-
-        btnActualizar.setOnClickListener {
-            actualizarUsuario()
-        }
-
-        btnEliminar.setOnClickListener {
-            eliminarUsuario()
-        }
-
-        btnActualizar.isEnabled = false
-        btnEliminar.isEnabled = false
-    }
 
     private fun setupSpinnerRoles(roles: List<Role>) {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, roles)

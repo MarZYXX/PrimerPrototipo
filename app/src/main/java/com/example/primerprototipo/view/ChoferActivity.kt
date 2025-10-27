@@ -23,12 +23,9 @@ class ChoferActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
-        // Inicializar vistas
         editTiempoSalida = findViewById(R.id.tiempoSalida)
         numPasajeros = findViewById(R.id.noPasajeros)
         parada = findViewById(R.id.nextParada)
 
-        // CORRECCIÓN: Solo inicializar las vistas que existen
-        // No modificar textChofer si no existe en el XML
     }
 }

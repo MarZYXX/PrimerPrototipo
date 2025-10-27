@@ -26,8 +26,25 @@
         <activity
             android:name=".view.RegistroActivity"
             android:exported="false" />
+
         <activity
             android:name=".view.MapaActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".view.AdminActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".view.SuperAdminActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".view.ChoferActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".view.GestionCuentasActivity"
             android:exported="false" />
 
         <meta-data
