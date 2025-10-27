@@ -122,8 +122,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textView6" />
 
-        <!-- Selección de Rol (solo visible para SuperAdmin o en creación) -->
-        <TextView
+         <TextView
             android:id="@+id/textView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -142,8 +141,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textView7" />
 
-        <!-- Botones de acción -->
-        <Button
+         <Button
             android:id="@+id/btnCrear"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -176,8 +174,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnCrear" />
 
-        <!-- Mensajes de estado -->
-        <TextView
+         <TextView
             android:id="@+id/tvMensaje"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
