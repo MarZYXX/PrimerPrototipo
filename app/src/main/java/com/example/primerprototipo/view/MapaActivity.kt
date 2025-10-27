@@ -5,6 +5,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.primerprototipo.R
+import com.example.primerprototipo.model.Usuario
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -17,10 +18,14 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var btnRastrear: Button
     private lateinit var tvInfoBus: TextView
+    private lateinit var usuarioActual: Usuario
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mapa_ruta)
+
+        // Obtener usuario actual del intent
+        usuarioActual = intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
 
         btnRastrear = findViewById(R.id.btnRastrear)
         tvInfoBus = findViewById(R.id.tvInfoBus)

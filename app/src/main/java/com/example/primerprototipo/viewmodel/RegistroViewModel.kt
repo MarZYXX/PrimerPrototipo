@@ -3,6 +3,7 @@ package com.example.primerprototipo.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.primerprototipo.model.Role
 import com.example.primerprototipo.model.Usuario
 
 class RegistroViewModel : ViewModel() {
@@ -21,43 +22,37 @@ class RegistroViewModel : ViewModel() {
     }
 
     fun registrarUsuario(nombre: String, correo: String, pass: String, confirmar: String) {
-        // Validar campos vacíos
-        if (nombre.isEmpty() || correo.isEmpty() || pass.isEmpty() || confirmar.isEmpty()) {
+         if (nombre.isEmpty() || correo.isEmpty() || pass.isEmpty() || confirmar.isEmpty()) {
             _errorMensaje.value = "Por favor llena todos los campos"
             _registroExitoso.value = false
             return
         }
 
-        // Validar formato de correo
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
+         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
             _errorMensaje.value = "Correo electrónico inválido"
             _registroExitoso.value = false
             return
         }
 
-        // Validar longitud de contraseña
-        if (pass.length < 6) {
+         if (pass.length < 6) {
             _errorMensaje.value = "La contraseña debe tener al menos 6 caracteres"
             _registroExitoso.value = false
             return
         }
 
-        // Validar que las contraseñas coincidan
-        if (pass != confirmar) {
+         if (pass != confirmar) {
             _errorMensaje.value = "Las contraseñas no coinciden"
             _registroExitoso.value = false
             return
         }
 
-        // Verificar si el correo ya está registrado
-        if (UserRepository.findUserByEmail(correo) != null) {
+         if (UserRepository.findUserByEmail(correo) != null) {
             _errorMensaje.value = "El correo ya está registrado"
             _registroExitoso.value = false
             return
         }
 
-        // Todo correcto, registrar usuario
-        val nuevoUsuario = Usuario(nombre, correo, pass)
+         val nuevoUsuario = Usuario(nombre, correo, pass, Role.Usuario) // CORRECCIÓN AQUÍ
         UserRepository.addUser(nuevoUsuario)
 
         _registroExitoso.value = true

@@ -26,17 +26,16 @@ class GestionCuentasActivity : AppCompatActivity() {
     private lateinit var btnEliminar: Button
     private lateinit var tvMensaje: TextView
 
-     private lateinit var usuarioActual: Usuario
+    private lateinit var usuarioActual: Usuario
     private var usuarioEditando: Usuario? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gestionar)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+         usuarioActual = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("USUARIO_ACTUAL", Usuario::class.java)!!
-        }
-        else{
+        } else {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
@@ -62,11 +61,11 @@ class GestionCuentasActivity : AppCompatActivity() {
     private fun initViewModel() {
         viewModel = ViewModelProvider(this)[GestionarCuentasViewModel::class.java]
 
-         viewModel.rolesDisponibles.observe(this) { roles ->
+        viewModel.rolesDisponibles.observe(this) { roles ->
             setupSpinnerRoles(roles)
         }
 
-         viewModel.usuarioEncontrado.observe(this) { usuario ->
+        viewModel.usuarioEncontrado.observe(this) { usuario ->
             usuarioEditando = usuario
             if (usuario != null) {
                 cargarDatosUsuario(usuario)
@@ -81,23 +80,23 @@ class GestionCuentasActivity : AppCompatActivity() {
             }
         }
 
-         viewModel.mensaje.observe(this) { mensaje ->
+        viewModel.mensaje.observe(this) { mensaje ->
             tvMensaje.text = mensaje
         }
 
-         viewModel.operacionExitosa.observe(this) { exitoso ->
+        viewModel.operacionExitosa.observe(this) { exitoso ->
             if (exitoso) {
-                // operacion exitosa, agregar toast
+                Toast.makeText(this, "Operación completada", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun setupUI() {
-         val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
+        val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
 
-         viewModel.cargarRolesDisponibles(esSuperAdmin)
+        viewModel.cargarRolesDisponibles(esSuperAdmin)
 
-         btnBuscar.setOnClickListener {
+        btnBuscar.setOnClickListener {
             val correo = etCorreoBusqueda.text.toString().trim()
             viewModel.buscarUsuario(correo)
         }
@@ -114,7 +113,7 @@ class GestionCuentasActivity : AppCompatActivity() {
             eliminarUsuario()
         }
 
-         btnActualizar.isEnabled = false
+        btnActualizar.isEnabled = false
         btnEliminar.isEnabled = false
     }
 
@@ -123,7 +122,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerRol.adapter = adapter
 
-         if (usuarioEditando == null) {
+        if (usuarioEditando == null) {
             val defaultRole = if (roles.contains(Role.Usuario)) Role.Usuario else roles.first()
             val position = roles.indexOf(defaultRole)
             if (position >= 0) {
@@ -137,7 +136,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         etCorreo.setText(usuario.correo)
         etContrasena.setText("")
 
-         val rolActual = usuario.rol
+        val rolActual = usuario.rol
         val adapter = spinnerRol.adapter as ArrayAdapter<Role>
         val position = adapter.getPosition(rolActual)
         if (position >= 0) {

@@ -10,10 +10,10 @@ object UserRepository {
     private fun precargados() {
         users.addAll(
             listOf(
-                Usuario("Usuario Cliente", "usuario@example.com", "usuario123", Role.Usuario),
-                Usuario("Chofer ", "chofer@example.com", "chofer123", Role.Chofer),
-                Usuario("Administrador", "admin@example.com", "admin123", Role.Admin),
-                Usuario("Super Admin", "superadmin@example.com", "super123", Role.SuperAdmin)
+                Usuario("Usuario Cliente", "usuario@gmail.com", "usuario123", Role.Usuario),
+                Usuario("Chofer ", "chofer@gmail.com", "chofer123", Role.Chofer),
+                Usuario("Administrador", "admin@gmail.com", "admin123", Role.Admin),
+                Usuario("Super Admin", "superadmin@gmail.com", "super123", Role.SuperAdmin)
             )
         )
     }
