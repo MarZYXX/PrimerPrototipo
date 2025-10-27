@@ -14,7 +14,7 @@
             android:id="@+id/GestionC"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/gestionar_cuentas"
+            android:text="Gestionar cuentas"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -26,7 +26,7 @@
             android:id="@+id/textView4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/buscar_usuario_por_correo"
+            android:text="Buscar usuario por correo:"
             android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@+id/mostrarCuenta"
             app:layout_constraintStart_toStartOf="parent"
@@ -188,6 +188,17 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnEliminar" />
+
+        <Button
+            android:id="@+id/btnFinalizar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Finalizar operación"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvMensaje" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
