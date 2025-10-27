@@ -15,7 +15,6 @@ class SuperAdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_superadmin)
 
-        // Obtener usuario actual del intent
         usuarioActual = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("USUARIO_ACTUAL", Usuario::class.java)!!
         } else {
