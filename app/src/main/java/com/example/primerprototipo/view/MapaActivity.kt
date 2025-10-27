@@ -24,9 +24,13 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mapa_ruta)
 
-        // Obtener usuario actual del intent
-        usuarioActual = intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
 
+        usuarioActual = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("USUARIO_ACTUAL", Usuario::class.java)!!
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
+        }
         btnRastrear = findViewById(R.id.btnRastrear)
         tvInfoBus = findViewById(R.id.tvInfoBus)
 

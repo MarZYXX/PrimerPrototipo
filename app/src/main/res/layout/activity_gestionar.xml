@@ -35,8 +35,8 @@
 
         <EditText
             android:id="@+id/editTextCorreo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="285dp"
+            android:layout_height="55dp"
             android:layout_marginTop="8dp"
             android:ems="10"
             android:hint="correo@ejemplo.com"
@@ -135,8 +135,8 @@
 
         <Spinner
             android:id="@+id/spinnerRol"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="343dp"
+            android:layout_height="26dp"
             android:layout_marginStart="16dp"
             app:layout_constraintBaseline_toBaselineOf="@+id/textView7"
             app:layout_constraintEnd_toEndOf="parent"

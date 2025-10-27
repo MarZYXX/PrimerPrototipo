@@ -44,8 +44,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".view.GestionCuentasActivity"
-            android:exported="false" />
+            android:name=".view.GestionCuentasActivity"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

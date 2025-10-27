@@ -39,6 +39,7 @@ class GestionCuentasActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
+        initViewModel()
 
         etCorreoBusqueda = findViewById(R.id.editTextCorreo)
         etNombre = findViewById(R.id.etNombre)
@@ -75,7 +76,6 @@ class GestionCuentasActivity : AppCompatActivity() {
         btnActualizar.isEnabled = false
         btnEliminar.isEnabled = false
 
-        initViewModel()
     }
 
 

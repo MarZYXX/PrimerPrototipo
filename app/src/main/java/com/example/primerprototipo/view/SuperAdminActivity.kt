@@ -21,8 +21,7 @@ class SuperAdminActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
-        // CORRECCIÓN: Usar el ID correcto del XML
-        val btnGestionarCuenta: Button = findViewById(R.id.gestionarCuenta)
+         val btnGestionarCuenta: Button = findViewById(R.id.gestionarCuenta)
 
         btnGestionarCuenta.setOnClickListener {
             val intent = Intent(this, GestionCuentasActivity::class.java)
