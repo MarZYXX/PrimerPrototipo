@@ -1,5 +1,6 @@
 package com.example.primerprototipo.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -31,6 +32,9 @@ class ChoferActivity : AppCompatActivity() {
         sesionChofer = findViewById(R.id.sesionChofer)
 
         sesionChofer.setOnClickListener{
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
             finish()
         }
     }
