@@ -23,4 +23,5 @@
     <string name="autobus">Autobus</string>
     <string name="gestionar_cuentas">Gestionar cuentas</string>
     <string name="buscar_usuario_por_correo">Buscar usuario por correo:</string>
+    <string name="finalizar_operaci_n">Finalizar operación</string>
 </resources>

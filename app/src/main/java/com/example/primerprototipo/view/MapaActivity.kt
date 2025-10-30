@@ -19,6 +19,7 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var btnRastrear: Button
     private lateinit var tvInfoBus: TextView
     private lateinit var usuarioActual: Usuario
+    private lateinit var closeMapSesion: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,12 +34,16 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         btnRastrear = findViewById(R.id.btnRastrear)
         tvInfoBus = findViewById(R.id.tvInfoBus)
+        closeMapSesion = findViewById(R.id.closeMapSesion)
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        mapFrag()
 
         btnRastrear.setOnClickListener {
             tvInfoBus.text = "Bus más cercano: En ruta hacia Martínez"
+        }
+
+        closeMapSesion.setOnClickListener {
+            finish()
         }
     }
 
@@ -47,5 +52,10 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
         val misantla = LatLng(19.93, -96.85)
         mMap.addMarker(MarkerOptions().position(misantla).title("Autobús en Misantla"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(misantla, 13f))
+    }
+
+    private fun mapFrag(){
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
 }

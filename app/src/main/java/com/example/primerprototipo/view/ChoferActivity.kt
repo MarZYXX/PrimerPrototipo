@@ -1,6 +1,7 @@
 package com.example.primerprototipo.view
 
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ class ChoferActivity : AppCompatActivity() {
     private lateinit var numPasajeros: TextView
     private lateinit var parada: TextView
     private lateinit var usuarioActual: Usuario
+    private lateinit var sesionChofer: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,10 @@ class ChoferActivity : AppCompatActivity() {
         editTiempoSalida = findViewById(R.id.tiempoSalida)
         numPasajeros = findViewById(R.id.noPasajeros)
         parada = findViewById(R.id.nextParada)
+        sesionChofer = findViewById(R.id.sesionChofer)
 
+        sesionChofer.setOnClickListener{
+            finish()
+        }
     }
 }

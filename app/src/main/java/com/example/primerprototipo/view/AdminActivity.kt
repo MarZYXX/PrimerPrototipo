@@ -14,6 +14,7 @@ class AdminActivity : AppCompatActivity() {
     private lateinit var txtBusView: TextView
     private lateinit var txtBusCount: TextView
     private lateinit var usuarioActual: Usuario
+    private lateinit var btnCerrarSesion: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +29,7 @@ class AdminActivity : AppCompatActivity() {
         btnManageAccounts = findViewById(R.id.manageAcc)
         txtBusView = findViewById(R.id.busView)
         txtBusCount = findViewById(R.id.textView2)
+        btnCerrarSesion = findViewById(R.id.admincerrar)
 
         txtBusCount.text = "5"
 
@@ -35,6 +37,10 @@ class AdminActivity : AppCompatActivity() {
             val intent = Intent(this, GestionCuentasActivity::class.java)
             intent.putExtra("USUARIO_ACTUAL", usuarioActual)
             startActivity(intent)
+        }
+
+        btnCerrarSesion.setOnClickListener {
+            finish()
         }
     }
 }
