@@ -21,6 +21,7 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
     private lateinit var usuarioActual: Usuario
     private lateinit var closeMapSesion: Button
     private lateinit var spinnerRuta: Spinner
+    private lateinit var imageViewMapa: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +37,10 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
         tvInfoBus = findViewById(R.id.tvInfoBus)
         closeMapSesion = findViewById(R.id.closeMapSesion)
         spinnerRuta = findViewById(R.id.spinnerRuta)
+        imageViewMapa = findViewById(R.id.imageView3)
+        imageViewMapa.visibility = android.view.View.VISIBLE
 
-        // Configurar el spinner
-        setupSpinner()
+         spinner()
 
         mapFrag()
 
@@ -52,9 +54,10 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
             startActivity(intent)
             finish()
         }
+
     }
 
-    private fun setupSpinner() {
+    private fun spinner() {
         val rutas = arrayOf("Misantla-Martínez", "Martínez-Misantla")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, rutas)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -75,8 +78,8 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
     private fun rastrearBus() {
         val rutaSeleccionada = spinnerRuta.selectedItemPosition
         when (rutaSeleccionada) {
-            0 -> tvInfoBus.text = "Bus más cercano: Arroyo Hondo - En ruta hacia Martínez"
-            1 -> tvInfoBus.text = "Bus más cercano: Santa Clara - En ruta hacia Misantla"
+            0 -> tvInfoBus.text = "Bus más cercano: Arroyo Hondo"
+            1 -> tvInfoBus.text = "Bus más cercano: Santa Clara"
         }
     }
 
