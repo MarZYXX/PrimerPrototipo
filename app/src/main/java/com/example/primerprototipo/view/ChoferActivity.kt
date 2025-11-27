@@ -3,9 +3,15 @@ package com.example.primerprototipo.view
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
@@ -18,12 +24,16 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 
 class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    // Vistas
     private lateinit var tvTituloChofer: TextView
     private lateinit var spinnerTerminal: Spinner
     private lateinit var tvNombreRuta: TextView
@@ -40,12 +50,15 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var btnCerrarSesion: Button
     private lateinit var layoutControles: View
 
+    // ViewModel y datos
     private lateinit var viewModel: ChoferViewModel
     private lateinit var usuarioActual: Usuario
     private var rutaConfigurada = false
 
+    // Mapa
     private lateinit var mMap: GoogleMap
     private var busMarker: Marker? = null
+    private var mapFragment: SupportMapFragment? = null
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
@@ -68,15 +81,18 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun initMap() {
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.mapChofer) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        mapFragment = supportFragmentManager.findFragmentById(R.id.mapChofer) as SupportMapFragment
+        mapFragment?.getMapAsync(this)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        // Configuración inicial del mapa
         val misantla = LatLng(19.9319, -96.8461)
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(misantla, 12f))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(misantla, 10f))
+
+        viewModel.rutaDibujable.value?.let {
+            if (it.isNotEmpty()) dibujarRuta(it)
+        }
     }
 
     private fun initViewModel() {
@@ -171,8 +187,14 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         viewModel.mensaje.observe(this) { if (it.isNotEmpty()) Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
 
         viewModel.autobus.observe(this) { autobus ->
-            if (::mMap.isInitialized) { // Asegurarse de que el mapa esté listo
+            if (::mMap.isInitialized) {
                 actualizarUbicacionEnMapa(autobus.latitud, autobus.longitud)
+            }
+        }
+
+        viewModel.rutaDibujable.observe(this) { ruta ->
+            if (ruta != null && ruta.isNotEmpty() && ::mMap.isInitialized) {
+                dibujarRuta(ruta)
             }
         }
 
@@ -194,7 +216,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun cerrarSesion() {
-        viewModel.finalizarRuta() // También finaliza la ruta al cerrar sesión
+        viewModel.finalizarRuta()
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
@@ -203,7 +225,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun solicitarPermisosDeUbicacion() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.POST_NOTIFICATIONS), LOCATION_PERMISSION_REQUEST_CODE)
         }
     }
 
@@ -220,21 +242,45 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         stopService(Intent(this, LocationForegroundService::class.java))
     }
 
+    private fun dibujarRuta(ruta: List<LatLng>) {
+        if (!::mMap.isInitialized) return
+
+        mMap.clear()
+        val polylineOptions = PolylineOptions().color(Color.BLUE).width(10f).addAll(ruta)
+        mMap.addPolyline(polylineOptions)
+
+        val boundsBuilder = LatLngBounds.Builder()
+        ruta.forEach { boundsBuilder.include(it) }
+
+        mMap.addMarker(MarkerOptions().position(ruta.first()).title("Inicio de Ruta"))
+        mMap.addMarker(MarkerOptions().position(ruta.last()).title("Fin de Ruta"))
+
+        mapFragment?.view?.post {
+            try {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 150))
+            } catch (e: IllegalStateException) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ruta.first(), 12f))
+            }
+        }
+    }
+
     private fun actualizarUbicacionEnMapa(latitud: Double, longitud: Double) {
         val nuevaPosicion = LatLng(latitud, longitud)
         if (busMarker == null) {
-            busMarker = mMap.addMarker(MarkerOptions().position(nuevaPosicion).title("Mi Autobús"))
+            busMarker = mMap.addMarker(MarkerOptions()
+                .position(nuevaPosicion)
+                .title("Mi Autobús")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
         } else {
             busMarker?.position = nuevaPosicion
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nuevaPosicion, 15f))
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permiso concedido. La lógica para iniciar el servicio ya está en el observer.
+                // Permiso concedido.
             } else {
                 Toast.makeText(this, "El permiso de ubicación es necesario para el rastreo.", Toast.LENGTH_LONG).show()
             }

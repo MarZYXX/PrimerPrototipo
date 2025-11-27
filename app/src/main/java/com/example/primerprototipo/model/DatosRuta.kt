@@ -87,6 +87,16 @@ object RutasMisantla {
             Terminal.MARTINEZ -> "Misantla"
         }
     }
+    
+    /**
+     * Obtiene la terminal de origen según la terminal de destino
+     */
+    fun obtenerTerminalOrigen(terminal: Terminal): String {
+        return when (terminal) {
+            Terminal.MISANTLA -> "Misantla"
+            Terminal.MARTINEZ -> "Martínez de la Torre"
+        }
+    }    
 }
 
 object HorariosRuta {
