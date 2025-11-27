@@ -1,181 +1,156 @@
 package com.example.primerprototipo.view
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Spinner
-import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.map
+import androidx.lifecycle.ViewModelProvider
 import com.example.primerprototipo.R
+import com.example.primerprototipo.model.Terminal
 import com.example.primerprototipo.model.UbicacionAutobus
-import com.example.primerprototipo.model.Usuario
-import com.example.primerprototipo.repository.LocationRepository
+import com.example.primerprototipo.viewmodel.MapaViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 
-class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItemSelectedListener {
+class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var btnRastrear: Button
-    private lateinit var tvInfoBus: TextView
-    private lateinit var usuarioActual: Usuario
-    private lateinit var closeMapSesion: Button
     private lateinit var spinnerRuta: Spinner
-    private lateinit var imageViewMapa: ImageView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var btnCerrarSesion: Button
 
-    private var autobusesMarkers = mutableMapOf<String, Marker>()
-    private var rutaSeleccionada = ""
+    private lateinit var viewModel: MapaViewModel
+
+    private var busMarkers = mutableMapOf<String, Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mapa_ruta)
 
-        usuarioActual = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("USUARIO_ACTUAL", Usuario::class.java)!!
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
-        }
-        btnRastrear = findViewById(R.id.btnRastrear)
-        tvInfoBus = findViewById(R.id.tvInfoBus)
-        closeMapSesion = findViewById(R.id.closeMapSesion)
+        viewModel = ViewModelProvider(this)[MapaViewModel::class.java]
+
         spinnerRuta = findViewById(R.id.spinnerRuta)
-        imageViewMapa = findViewById(R.id.imageView3)
-        imageViewMapa.visibility = View.VISIBLE
+        progressBar = findViewById(R.id.progressBarMapa)
+        btnCerrarSesion = findViewById(R.id.closeMapSesion)
 
-        spinner()
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
-        mapFrag()
+        setupSpinner()
+        setupObservers()
 
-        btnRastrear.setOnClickListener {
-            rastrearBus()
-        }
-
-        closeMapSesion.setOnClickListener {
+        btnCerrarSesion.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             finish()
         }
-
-        LocationRepository.iniciarEscuchaUbicaciones()
-
-        // Observar cambios en ubicaciones
-        LocationRepository.ubicaciones.observe(this) { ubicaciones ->
-            actualizarMarkersEnMapa(ubicaciones)
-            actualizarInfoBusMasCercano()
-        }
-    }
-
-    private fun spinner() {
-        val rutas = arrayOf(
-            "Misantla - Martinez de la Torre",
-            "Martinez de la Torre - Misantla"
-        )
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, rutas)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerRuta.adapter = adapter
-        spinnerRuta.onItemSelectedListener = this
-    }
-
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-        rutaSeleccionada = when (position) {
-            0 -> "Misantla - Martinez de la Torre"
-            1 -> "Martinez de la Torre - Misantla"
-            else -> ""
-        }
-
-        // Filtrar por ruta seleccionada
-        LocationRepository.iniciarEscuchaUbicaciones(rutaSeleccionada)
-        actualizarInfoBusMasCercano()
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>) {
-    }
-
-    private fun rastrearBus() {
-        val rutaSeleccionada = spinnerRuta.selectedItemPosition
-        when (rutaSeleccionada) {
-            0 -> tvInfoBus.text = "Bus más cercano: Arroyo Hondo"
-            1 -> tvInfoBus.text = "Bus más cercano: Santa Clara"
-        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        configurarMapa()
-    }
-
-    private fun configurarMapa() {
-        // Configuración inicial del mapa
-        mMap.uiSettings.isZoomControlsEnabled = true
-        mMap.uiSettings.isMyLocationButtonEnabled = true
-
-        // Centrar en Misantla por defecto
         val misantla = LatLng(19.9319, -96.8461)
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(misantla, 12f))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(misantla, 10f))
     }
 
-    private fun actualizarMarkersEnMapa(ubicaciones: Map<String, UbicacionAutobus>) {
-        // Remover markers antiguos
-        autobusesMarkers.values.forEach { it.remove() }
-        autobusesMarkers.clear()
+    private fun setupSpinner() {
+        val rutas = Terminal.values().map { it.nombreCompleto }.toMutableList()
+        rutas.add(0, "Selecciona una ruta para ver")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, rutas)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerRuta.adapter = adapter
 
-        // Agregar nuevos markers
-        ubicaciones.values.forEach { ubicacion ->
-            if (ubicacion.ruta == rutaSeleccionada) {
-                val marker = mMap.addMarker(
+        spinnerRuta.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position == 0) return
+                progressBar.visibility = View.VISIBLE
+                val terminalSeleccionada = Terminal.values()[position - 1]
+                viewModel.seleccionarRuta(terminalSeleccionada)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.rutaDibujable.observe(this) { ruta ->
+            progressBar.visibility = View.GONE
+            if (ruta != null && ::mMap.isInitialized) {
+                dibujarRutaYParadas(ruta, viewModel.paradasDeLaRuta.value ?: emptyList())
+            }
+        }
+
+        viewModel.autobusesEnRuta.observe(this) { autobuses ->
+            if (::mMap.isInitialized) {
+                actualizarMarcadoresDeAutobuses(autobuses)
+            }
+        }
+
+        viewModel.mensajeError.observe(this) { error ->
+            progressBar.visibility = View.GONE
+            Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun dibujarRutaYParadas(ruta: List<LatLng>, paradas: List<com.example.primerprototipo.model.Parada>) {
+        mMap.clear()
+        val polylineOptions = PolylineOptions().color(Color.BLUE).width(12f).addAll(ruta)
+        mMap.addPolyline(polylineOptions)
+
+        paradas.forEach {
+            mMap.addMarker(MarkerOptions().position(LatLng(it.latitud, it.longitud)).title(it.nombre))
+        }
+
+        val boundsBuilder = LatLngBounds.Builder()
+        ruta.forEach { boundsBuilder.include(it) }
+        spinnerRuta.post {
+            try {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 150))
+            } catch (e: IllegalStateException) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ruta.first(), 12f))
+            }
+        }
+    }
+
+    private fun actualizarMarcadoresDeAutobuses(autobuses: List<UbicacionAutobus>) {
+        val autobusIdsActuales = autobuses.map { it.autobusId }
+
+        val marcadoresAEliminar = busMarkers.keys.filterNot { autobusIdsActuales.contains(it) }
+        marcadoresAEliminar.forEach {
+            busMarkers.remove(it)?.remove()
+        }
+
+        autobuses.forEach { autobus ->
+            val pos = LatLng(autobus.latitud, autobus.longitud)
+            if (busMarkers.containsKey(autobus.autobusId)) {
+                busMarkers[autobus.autobusId]?.position = pos
+            } else {
+                val nuevoMarcador = mMap.addMarker(
                     MarkerOptions()
-                        .position(LatLng(ubicacion.latitud, ubicacion.longitud))
-                        .title("Autobús ${ubicacion.autobusId}")
-                        .snippet("Ruta: ${ubicacion.ruta}")
+                        .position(pos)
+                        .title("Autobús #${autobus.autobusId}")
+                        .snippet("Próxima parada: ${autobus.proximaParada}")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus_marker))
                 )
-                marker?.let { autobusesMarkers[ubicacion.autobusId] = it }
+                if (nuevoMarcador != null) {
+                    busMarkers[autobus.autobusId] = nuevoMarcador
+                }
             }
         }
-    }
-
-    private fun actualizarInfoBusMasCercano() {
-        if (rutaSeleccionada.isNotEmpty()) {
-            // Usar ubicación del usuario (por ahora usar Misantla como ejemplo)
-            val userLat = 19.9319
-            val userLng = -96.8461
-
-            val autobusCercano = LocationRepository.obtenerAutobusMasCercano(
-                userLat, userLng, rutaSeleccionada
-            )
-
-            autobusCercano?.let { bus ->
-                val distancia = LocationRepository.calcularDistancia(
-                    userLat, userLng, bus.latitud, bus.longitud
-                )
-
-                tvInfoBus.text = "Bus más cercano: A ${String.format("%.1f", distancia)} km - ${bus.proximaParada}"
-            } ?: run {
-                tvInfoBus.text = "Bus más cercano: No disponible"
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        LocationRepository.detenerEscucha()
-    }
-
-    private fun mapFrag(){
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
     }
 }

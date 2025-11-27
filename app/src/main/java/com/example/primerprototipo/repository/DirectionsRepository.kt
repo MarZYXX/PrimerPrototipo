@@ -1,5 +1,6 @@
 package com.example.primerprototipo.repository
 
+import com.example.primerprototipo.BuildConfig
 import com.example.primerprototipo.model.Parada
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.DirectionsApi
@@ -10,19 +11,13 @@ import kotlinx.coroutines.withContext
 
 object DirectionsRepository {
 
-    // ⚠️====================================================================================⚠️
-    // ⚠️ ¡ATENCIÓN! DEBES REEMPLAZAR ESTO CON TU CLAVE DE API DE GOOGLE MAPS REAL.         ⚠️
-    // ⚠️ Y ASEGURARTE DE QUE LA "DIRECTIONS API" ESTÉ ACTIVADA EN TU GOOGLE CLOUD CONSOLE. ⚠️
-    // ⚠️====================================================================================⚠️
-    private const val API_KEY = "AIzaSyC0ij7ZfnTiTGCQtuOZeNK8QHAQU7qXz7I"
-
     suspend fun getDirections(paradas: List<Parada>): Result<List<LatLng>> {
         if (paradas.size < 2) return Result.failure(Exception("Se necesitan al menos 2 paradas."))
 
         return withContext(Dispatchers.IO) {
             try {
                 val geoApiContext = GeoApiContext.Builder()
-                    .apiKey(API_KEY)
+                    .apiKey(BuildConfig.MAPS_API_KEY)
                     .build()
 
                 val origen = paradas.first()
@@ -34,6 +29,7 @@ object DirectionsRepository {
                     .destination("${destino.latitud},${destino.longitud}")
                     .waypoints(*waypoints)
                     .mode(TravelMode.DRIVING)
+                    .avoid(DirectionsApi.RouteRestriction.HIGHWAYS)
                     .await()
 
                 if (result.routes.isNotEmpty()) {

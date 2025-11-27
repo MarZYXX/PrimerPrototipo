@@ -9,7 +9,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 
 /**
  * Servicio para obtener rutas reales de Google Directions API
@@ -84,6 +83,7 @@ object DirectionsApiService {
         // Parámetros adicionales
         url += "&mode=driving" // Modo conducción
         url += "&language=es" // Idioma español
+        url += "&avoid=highways" // ✨ ¡AQUÍ ESTÁ LA MAGIA! Se evita la autopista
         url += "&key=$API_KEY"
 
         return url
@@ -138,7 +138,6 @@ object DirectionsApiService {
 
     /**
      * Decodifica una polilínea codificada de Google Maps
-     * Algoritmo de Google: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
      */
     private fun decodificarPolyline(encoded: String): List<LatLng> {
         val poly = ArrayList<LatLng>()

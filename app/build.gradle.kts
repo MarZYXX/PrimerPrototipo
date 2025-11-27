@@ -26,8 +26,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // Poner la clave de API disponible para el Manifest
+
+        // Poner la clave de API disponible para el Manifest y el código
         manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
+        buildConfigField("String", "MAPS_API_KEY", "\"${localProperties.getProperty("MAPS_API_KEY", "")}\"")
     }
 
     buildTypes {
@@ -48,6 +50,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true // Habilitar BuildConfig
     }
 }
 
