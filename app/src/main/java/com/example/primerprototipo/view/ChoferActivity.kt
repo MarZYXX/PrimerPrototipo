@@ -14,8 +14,15 @@ import com.example.primerprototipo.model.LocationForegroundService
 import com.example.primerprototipo.model.Terminal
 import com.example.primerprototipo.model.Usuario
 import com.example.primerprototipo.viewmodel.ChoferViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 
-class ChoferActivity : AppCompatActivity() {
+class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var tvTituloChofer: TextView
     private lateinit var spinnerTerminal: Spinner
@@ -29,12 +36,16 @@ class ChoferActivity : AppCompatActivity() {
     private lateinit var btnQuitarPasajero: Button
     private lateinit var btnSiguienteParada: Button
     private lateinit var btnParadaAnterior: Button
+    private lateinit var btnFinalizarRuta: Button
     private lateinit var btnCerrarSesion: Button
     private lateinit var layoutControles: View
 
     private lateinit var viewModel: ChoferViewModel
     private lateinit var usuarioActual: Usuario
     private var rutaConfigurada = false
+
+    private lateinit var mMap: GoogleMap
+    private var busMarker: Marker? = null
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
@@ -46,6 +57,7 @@ class ChoferActivity : AppCompatActivity() {
 
         initViewModel()
         initViews()
+        initMap()
         leerDatosIntent()
         setupObservers()
         inicializarDatos()
@@ -53,6 +65,18 @@ class ChoferActivity : AppCompatActivity() {
         configurarSpinnerHorario()
         setupListeners()
         solicitarPermisosDeUbicacion()
+    }
+
+    private fun initMap() {
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.mapChofer) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+        // Configuración inicial del mapa
+        val misantla = LatLng(19.9319, -96.8461)
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(misantla, 12f))
     }
 
     private fun initViewModel() {
@@ -72,6 +96,7 @@ class ChoferActivity : AppCompatActivity() {
         btnQuitarPasajero = findViewById(R.id.btnQuitarPasajero)
         btnSiguienteParada = findViewById(R.id.btnSiguienteParada)
         btnParadaAnterior = findViewById(R.id.btnParadaAnterior)
+        btnFinalizarRuta = findViewById(R.id.btnFinalizarRuta)
         btnCerrarSesion = findViewById(R.id.sesionChofer)
         layoutControles = findViewById(R.id.layoutControles)
         mostrarControles(false)
@@ -145,6 +170,12 @@ class ChoferActivity : AppCompatActivity() {
         viewModel.terminalDestino.observe(this) { tvTerminalDestino.text = it }
         viewModel.mensaje.observe(this) { if (it.isNotEmpty()) Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
 
+        viewModel.autobus.observe(this) { autobus ->
+            if (::mMap.isInitialized) { // Asegurarse de que el mapa esté listo
+                actualizarUbicacionEnMapa(autobus.latitud, autobus.longitud)
+            }
+        }
+
         viewModel.accionServicio.observe(this) { accion ->
             when (accion) {
                 is ChoferViewModel.AccionServicio.INICIAR -> iniciarServicioDeUbicacion()
@@ -158,11 +189,12 @@ class ChoferActivity : AppCompatActivity() {
         btnQuitarPasajero.setOnClickListener { viewModel.quitarPasajero() }
         btnSiguienteParada.setOnClickListener { viewModel.avanzarSiguienteParada() }
         btnParadaAnterior.setOnClickListener { viewModel.retrocederParada() }
+        btnFinalizarRuta.setOnClickListener { viewModel.finalizarRuta() }
         btnCerrarSesion.setOnClickListener { cerrarSesion() }
     }
 
     private fun cerrarSesion() {
-        viewModel.finalizarRuta()
+        viewModel.finalizarRuta() // También finaliza la ruta al cerrar sesión
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
@@ -186,6 +218,16 @@ class ChoferActivity : AppCompatActivity() {
 
     private fun detenerServicioDeUbicacion() {
         stopService(Intent(this, LocationForegroundService::class.java))
+    }
+
+    private fun actualizarUbicacionEnMapa(latitud: Double, longitud: Double) {
+        val nuevaPosicion = LatLng(latitud, longitud)
+        if (busMarker == null) {
+            busMarker = mMap.addMarker(MarkerOptions().position(nuevaPosicion).title("Mi Autobús"))
+        } else {
+            busMarker?.position = nuevaPosicion
+        }
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nuevaPosicion, 15f))
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

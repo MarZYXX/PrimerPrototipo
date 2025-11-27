@@ -27,7 +27,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Sección: Selección de Terminal -->
         <TextView
             android:id="@+id/tvLabelTerminal"
             android:layout_width="wrap_content"
@@ -45,22 +44,21 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:minHeight="48dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvLabelTerminal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/tvLabelTerminal"
-            app:layout_constraintTop_toTopOf="@id/tvLabelTerminal"
-            app:layout_constraintBottom_toBottomOf="@id/tvLabelTerminal"/>
+            app:layout_constraintTop_toTopOf="@id/tvLabelTerminal" />
 
-        <!-- Información de la Ruta -->
         <TextView
             android:id="@+id/tvNombreRuta"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:gravity="center"
             android:text="Ruta no configurada"
             android:textColor="@android:color/holo_blue_dark"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/spinnerTerminal" />
@@ -70,14 +68,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:gravity="center"
             android:text="Destino: ---"
             android:textSize="14sp"
-            android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvNombreRuta" />
 
-        <!-- Layout de Controles (se oculta hasta seleccionar terminal) -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutControles"
             android:layout_width="0dp"
@@ -88,13 +85,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvTerminalDestino">
 
-            <!-- Sección: Tiempo de Salida -->
+            <!-- Horario de Salida -->
             <TextView
                 android:id="@+id/choferSalida"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Horario de salida:"
+                android:text="Horario de Salida:"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -104,14 +100,13 @@
                 android:id="@+id/spinnerHorario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:minHeight="48dp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/choferSalida"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/choferSalida"
-                app:layout_constraintTop_toTopOf="@id/choferSalida"
-                app:layout_constraintBottom_toBottomOf="@id/choferSalida"/>
+                app:layout_constraintTop_toTopOf="@id/choferSalida" />
 
-            <!-- Sección: Pasajeros -->
+            <!-- Pasajeros -->
             <TextView
                 android:id="@+id/pasajerosAbordo"
                 android:layout_width="wrap_content"
@@ -133,8 +128,7 @@
                 android:textSize="24sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/pasajerosAbordo"
-                app:layout_constraintStart_toEndOf="@id/pasajerosAbordo"
-                app:layout_constraintTop_toTopOf="@id/pasajerosAbordo" />
+                app:layout_constraintStart_toEndOf="@id/pasajerosAbordo" />
 
             <TextView
                 android:id="@+id/tvCapacidadDisponible"
@@ -147,7 +141,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/pasajerosAbordo" />
 
-            <!-- Botones de Pasajeros -->
             <Button
                 android:id="@+id/btnAgregarPasajero"
                 android:layout_width="0dp"
@@ -169,7 +162,7 @@
                 app:layout_constraintStart_toEndOf="@id/btnAgregarPasajero"
                 app:layout_constraintTop_toTopOf="@id/btnAgregarPasajero" />
 
-            <!-- Sección: Próxima Parada -->
+            <!-- Próxima Parada -->
             <TextView
                 android:id="@+id/nextStop"
                 android:layout_width="wrap_content"
@@ -192,10 +185,8 @@
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/nextStop"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/nextStop"
-                app:layout_constraintTop_toTopOf="@id/nextStop" />
+                app:layout_constraintStart_toEndOf="@id/nextStop" />
 
-            <!-- Botones de Navegación de Paradas -->
             <Button
                 android:id="@+id/btnParadaAnterior"
                 android:layout_width="0dp"
@@ -217,49 +208,38 @@
                 app:layout_constraintStart_toEndOf="@id/btnParadaAnterior"
                 app:layout_constraintTop_toTopOf="@id/btnParadaAnterior" />
 
-            <!-- Imagen del Mapa (placeholder) -->
-            <ImageView
-                android:id="@+id/imageView"
+            <!-- Mapa -->
+            <fragment
+                android:id="@+id/mapChofer"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="0dp"
-                android:layout_height="200dp"
+                android:layout_height="250dp"
                 android:layout_marginTop="24dp"
-                android:contentDescription="Mapa de ruta"
-                android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnParadaAnterior"
-                tools:srcCompat="@mipmap/map" />
+                app:layout_constraintTop_toBottomOf="@+id/btnParadaAnterior" />
 
-            <!-- Botón Cerrar Sesión -->
+            <Button
+                android:id="@+id/btnFinalizarRuta"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:text="Finalizar Ruta"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mapChofer" />
+
             <Button
                 android:id="@+id/sesionChofer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="@android:color/holo_red_dark"
                 android:text="Cerrar Sesión"
-                android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnParadaAnterior" />
+                app:layout_constraintTop_toBottomOf="@+id/btnFinalizarRuta" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- Botón Cerrar Sesión (siempre visible) -->
-        <Button
-            android:id="@+id/btnCerrarSesionPrincipal"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@android:color/holo_red_dark"
-            android:text="Cerrar Sesión"
-            android:textSize="16sp"
-            android:onClick="cerrarSesion"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutControles" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
