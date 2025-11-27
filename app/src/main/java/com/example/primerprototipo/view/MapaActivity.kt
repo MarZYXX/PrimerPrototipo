@@ -2,16 +2,26 @@ package com.example.primerprototipo.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.*
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.map
 import com.example.primerprototipo.R
-import com.example.primerprototipo.model.RutasMisantla
+import com.example.primerprototipo.model.UbicacionAutobus
 import com.example.primerprototipo.model.Usuario
+import com.example.primerprototipo.repository.LocationRepository
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
 class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItemSelectedListener {
@@ -42,9 +52,9 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
         closeMapSesion = findViewById(R.id.closeMapSesion)
         spinnerRuta = findViewById(R.id.spinnerRuta)
         imageViewMapa = findViewById(R.id.imageView3)
-        imageViewMapa.visibility = android.view.View.VISIBLE
+        imageViewMapa.visibility = View.VISIBLE
 
-         spinner()
+        spinner()
 
         mapFrag()
 
@@ -79,11 +89,16 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
         spinnerRuta.onItemSelectedListener = this
     }
 
-    override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
-        when (position) {
-            0 -> tvInfoBus.text = "Bus más cercano: En ruta hacia Martínez"
-            1 -> tvInfoBus.text = "Bus más cercano: En ruta hacia Misantla"
+    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+        rutaSeleccionada = when (position) {
+            0 -> "Misantla - Martinez de la Torre"
+            1 -> "Martinez de la Torre - Misantla"
+            else -> ""
         }
+
+        // Filtrar por ruta seleccionada
+        LocationRepository.iniciarEscuchaUbicaciones(rutaSeleccionada)
+        actualizarInfoBusMasCercano()
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
@@ -124,7 +139,7 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
                     MarkerOptions()
                         .position(LatLng(ubicacion.latitud, ubicacion.longitud))
                         .title("Autobús ${ubicacion.autobusId}")
-                        .snippet("Ruta: ${ubicacion.ruta}\nPasajeros: ${ubicacion.pasajerosAbordo}")
+                        .snippet("Ruta: ${ubicacion.ruta}")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus_marker))
                 )
                 marker?.let { autobusesMarkers[ubicacion.autobusId] = it }
@@ -147,23 +162,11 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback, AdapterView.OnItem
                     userLat, userLng, bus.latitud, bus.longitud
                 )
 
-                tvInfoBus.text = "Bus más cercano: A ${"%.1f".format(distancia)} km - ${bus.proximaParada}"
+                tvInfoBus.text = "Bus más cercano: A ${String.format("%.1f", distancia)} km - ${bus.proximaParada}"
             } ?: run {
                 tvInfoBus.text = "Bus más cercano: No disponible"
             }
         }
-    }
-
-    override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
-        rutaSeleccionada = when (position) {
-            0 -> "Misantla - Martinez de la Torre"
-            1 -> "Martinez de la Torre - Misantla"
-            else -> ""
-        }
-
-        // Filtrar por ruta seleccionada
-        LocationRepository.iniciarEscuchaUbicaciones(rutaSeleccionada)
-        actualizarInfoBusMasCercano()
     }
 
     override fun onDestroy() {

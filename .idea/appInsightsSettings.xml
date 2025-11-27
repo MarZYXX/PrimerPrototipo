@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.primerprototipo" />
+                  <option name="mobileSdkAppId" value="1:514220049202:android:8a822c8cdc5cdf49550d2b" />
+                  <option name="projectId" value="gps-bus-misantla-e3400" />
+                  <option name="projectNumber" value="514220049202" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

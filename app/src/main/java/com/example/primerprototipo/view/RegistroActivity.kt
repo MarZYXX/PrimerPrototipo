@@ -2,6 +2,7 @@ package com.example.primerprototipo.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +17,7 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var etConfirmar: EditText
     private lateinit var btnRegistrar: Button
     private lateinit var tvVolverLogin: TextView
+    private lateinit var progressBar: ProgressBar
 
     private lateinit var viewModel: RegistroViewModel
 
@@ -23,31 +25,17 @@ class RegistroActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registro)
 
-        // Inicializar ViewModel
         viewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
 
-        // Inicializar vistas
         etNombre = findViewById(R.id.etNombre)
         etCorreo = findViewById(R.id.etCorreoRegistro)
         etContrasena = findViewById(R.id.etContrasenaRegistro)
         etConfirmar = findViewById(R.id.etConfirmarContrasena)
         btnRegistrar = findViewById(R.id.buttonRegistrar)
         tvVolverLogin = findViewById(R.id.tvVolverLogin)
+        progressBar = findViewById(R.id.progressBarRegistro) // Asegúrate de que este ID exista en tu XML
 
-        // Observar el resultado del registro
-        viewModel.registroExitoso.observe(this) { exitoso ->
-            if (exitoso) {
-                Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show()
-                irALogin()
-            }
-        }
-
-        // Observar mensajes de error
-        viewModel.errorMensaje.observe(this) { mensaje ->
-            if (mensaje.isNotEmpty()) {
-                Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show()
-            }
-        }
+        setupObservers()
 
         btnRegistrar.setOnClickListener {
             val nombre = etNombre.text.toString().trim()
@@ -55,11 +43,30 @@ class RegistroActivity : AppCompatActivity() {
             val pass = etContrasena.text.toString().trim()
             val confirmar = etConfirmar.text.toString().trim()
 
-            viewModel.registrarUsuario(nombre, correo, pass, confirmar)
+            viewModel.registro(nombre, correo, pass, confirmar)
         }
 
         tvVolverLogin.setOnClickListener {
             irALogin()
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.isLoading.observe(this) { isLoading ->
+            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            btnRegistrar.isEnabled = !isLoading
+        }
+
+        viewModel.registroResult.observe(this) { result ->
+            when (result) {
+                is RegistroViewModel.RegistroResult.Success -> {
+                    Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show()
+                    irALogin()
+                }
+                is RegistroViewModel.RegistroResult.Error -> {
+                    Toast.makeText(this, result.mensaje, Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 

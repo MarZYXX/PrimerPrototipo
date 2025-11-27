@@ -10,6 +10,10 @@ import com.example.primerprototipo.model.Terminal
 
 class ChoferViewModel : ViewModel() {
 
+    // LiveData para notificar a la Activity
+    private val _accionServicio = MutableLiveData<AccionServicio>()
+    val accionServicio: LiveData<AccionServicio> = _accionServicio
+
     // ============================================
     // LiveData Observables
     // ============================================
@@ -162,27 +166,10 @@ class ChoferViewModel : ViewModel() {
         }
     }
 
-
-
-    fun iniciarTransmisionGPS(context: Context) {
-        val autobus = _autobus.value ?: return
-        val intent = Intent(context, LocationForegroundService::class.java).apply {
-            putExtra("autobus_id", autobus.id)
-            putExtra("ruta", autobus.ruta)
-            putExtra("chofer_id", usuarioActual?.correo ?: "unknown")
-        }
-        context.startService(intent)
-    }
-
-    fun detenerTransmisionGPS(context: Context) {
-        val intent = Intent(context, LocationForegroundService::class.java)
-        context.stopService(intent)
-    }
-
     // ============================================
-    // Gestión de Tiempo
+    // Gestión de Tiempo y Servicio
     // ============================================
-    fun establecerTiempoSalida(tiempo: String, context: Context) {
+    fun establecerTiempoSalida(tiempo: String) {
         if (tiempo.isEmpty()) {
             _mensaje.value = "Ingrese un tiempo de salida válido"
             return
@@ -194,10 +181,19 @@ class ChoferViewModel : ViewModel() {
 
         _autobus.value = bus
         actualizarDatos()
-        _mensaje.value = "Salida programada: $tiempo - Iniciando transmisión GPS"
+        _mensaje.value = "Salida programada: $tiempo"
 
-        // Iniciar GPS cuando se establece el horario
-        iniciarTransmisionGPS(context)
+        _accionServicio.value = AccionServicio.INICIAR
+    }
+
+    fun finalizarRuta() {
+        val bus = _autobus.value ?: return
+        bus.enRuta = false
+        _autobus.value = bus
+        actualizarDatos()
+
+        _accionServicio.value = AccionServicio.DETENER
+        _mensaje.value = "Ruta finalizada."
     }
 
     fun obtenerHorariosDisponibles(): List<String> {
@@ -207,42 +203,6 @@ class ChoferViewModel : ViewModel() {
             "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM",
             "04:00 PM", "05:00 PM", "06:00 PM"
         )
-    }
-
-    // ============================================
-    // Cambiar Ruta
-    // ============================================
-    fun cambiarRuta(nuevaRuta: String) {
-        val bus = _autobus.value ?: return
-
-        bus.ruta = nuevaRuta
-        paradasRuta = RutasMisantla.obtenerParadasPorRuta(nuevaRuta)
-        paradaActualIndex = 0
-
-        val primeraParada = paradasRuta.firstOrNull()
-        if (primeraParada != null) {
-            bus.proximaParada = primeraParada.nombre
-            bus.latitud = primeraParada.latitud
-            bus.longitud = primeraParada.longitud
-        }
-
-        _autobus.value = bus
-        actualizarDatos()
-        _mensaje.value = "Ruta cambiada a: $nuevaRuta"
-    }
-
-    // ============================================
-    // Obtener Terminales Disponibles
-    // ============================================
-    fun obtenerTerminalesDisponibles(): Array<Terminal> {
-        return Terminal.values()
-    }
-
-    // ============================================
-    // Verificar si la ruta está configurada
-    // ============================================
-    fun esRutaConfigurada(): Boolean {
-        return paradasRuta.isNotEmpty()
     }
 
     // ============================================
@@ -258,20 +218,9 @@ class ChoferViewModel : ViewModel() {
         val disponible = bus.obtenerCapacidadDisponible()
         _capacidadDisponible.value = "$disponible asientos disponibles"
     }
-
-    // ============================================
-    // Información del Estado
-    // ============================================
-    fun obtenerInfoCompleta(): String {
-        val bus = _autobus.value ?: return "No hay datos del autobús"
-
-        return """
-            Unidad: ${bus.numeroUnidad}
-            Ruta: ${bus.ruta}
-            Pasajeros: ${bus.pasajerosAbordo}/${Autobus.CAPACIDAD_MAXIMA}
-            Próxima parada: ${bus.proximaParada}
-            Salida: ${bus.tiempoSalida}
-            Estado: ${if (bus.enRuta) "En ruta" else "Detenido"}
-        """.trimIndent()
+    // Clase para representar acciones del servicio
+    sealed class AccionServicio {
+        object INICIAR : AccionServicio()
+        object DETENER : AccionServicio()
     }
 }

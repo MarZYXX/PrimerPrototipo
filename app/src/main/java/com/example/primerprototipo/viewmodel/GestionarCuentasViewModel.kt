@@ -3,13 +3,10 @@ package com.example.primerprototipo.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.primerprototipo.model.Usuario
 import com.example.primerprototipo.model.Role
+import com.example.primerprototipo.model.Usuario
 
 class GestionarCuentasViewModel : ViewModel() {
-
-    private val _rolesDisponibles = MutableLiveData<List<Role>>()
-    val rolesDisponibles: LiveData<List<Role>> = _rolesDisponibles
 
     private val _usuarioEncontrado = MutableLiveData<Usuario?>()
     val usuarioEncontrado: LiveData<Usuario?> = _usuarioEncontrado
@@ -20,146 +17,109 @@ class GestionarCuentasViewModel : ViewModel() {
     private val _operacionExitosa = MutableLiveData<Boolean>()
     val operacionExitosa: LiveData<Boolean> = _operacionExitosa
 
-     fun cargarRolesDisponibles(esSuperAdmin: Boolean) {
-        val roles = if (esSuperAdmin) {
-             listOf(Role.Usuario, Role.Chofer, Role.Admin, Role.SuperAdmin)
-        } else {
-             listOf(Role.Usuario, Role.Chofer)
-        }
-        _rolesDisponibles.value = roles
-    }
+    private val _rolesDisponibles = MutableLiveData<List<Role>>()
+    val rolesDisponibles: LiveData<List<Role>> = _rolesDisponibles
 
     fun buscarUsuario(correo: String) {
-        if (correo.isEmpty()) {
-            _mensaje.value = "Ingrese un correo para buscar"
-            return
-        }
-
         val usuario = UserRepository.findUserByEmail(correo)
-        if (usuario != null) {
-            _usuarioEncontrado.value = usuario
-            _mensaje.value = "Usuario encontrado: ${usuario.nombre}"
-        } else {
-            _usuarioEncontrado.value = null
+        _usuarioEncontrado.value = usuario
+        if (usuario == null) {
             _mensaje.value = "Usuario no encontrado"
         }
     }
 
-    fun crearUsuario(
-        nombre: String,
-        correo: String,
-        contrasena: String,
-        rol: Role,
-        usuarioActual: Usuario
-    ) {
-         if (nombre.isEmpty() || correo.isEmpty() || contrasena.isEmpty()) {
-            _mensaje.value = "Todos los campos son obligatorios"
+    fun cargarRolesDisponibles(esSuperAdmin: Boolean) {
+        val roles = if (esSuperAdmin) {
+            listOf(Role.Usuario, Role.Chofer, Role.Admin, Role.SuperAdmin)
+        } else {
+            listOf(Role.Usuario, Role.Chofer, Role.Admin)
+        }
+        _rolesDisponibles.value = roles
+    }
+
+    fun crearUsuario(nombre: String, correo: String, contrasena: String, rol: Role, creador: Usuario) {
+        if (!puedeCrear(creador, rol)) {
+            _mensaje.value = "No tienes permiso para crear este tipo de usuario"
             return
         }
 
-        if (contrasena.length < 6) {
-            _mensaje.value = "La contraseña debe tener al menos 6 caracteres"
+        if (UserRepository.findUserByEmail(correo) != null) {
+            _mensaje.value = "El correo ya está en uso"
             return
         }
 
-         when (usuarioActual.rol) {
-            Role.Admin -> {
-                 if (rol == Role.Admin || rol == Role.SuperAdmin) {
-                    _mensaje.value = "No tienes permisos para crear usuarios administradores"
-                    return
-                }
-            }
-            Role.SuperAdmin -> {
-             }
-            else -> {
-                _mensaje.value = "No tienes permisos para gestionar usuarios"
-                return
-            }
-        }
-
-         if (UserRepository.findUserByEmail(correo) != null) {
-            _mensaje.value = "El correo ya está registrado"
-            return
-        }
-
-         val nuevoUsuario = Usuario(nombre, correo, contrasena, rol)
+        val nuevoUsuario = Usuario(
+            id = "user-${System.currentTimeMillis()}",
+            nombre = nombre,
+            correo = correo,
+            contrasena = contrasena,
+            rol = rol
+        )
         UserRepository.addUser(nuevoUsuario)
-
-        _mensaje.value = "Usuario creado exitosamente: $nombre"
+        _mensaje.value = "Usuario creado con éxito"
         _operacionExitosa.value = true
-        limpiarFormulario()
     }
 
     fun actualizarUsuario(
-        usuarioExistente: Usuario,
-        nuevoNombre: String,
-        nuevoCorreo: String,
-        nuevaContrasena: String?,
-        nuevoRol: Role,
-        usuarioActual: Usuario
+        usuario: Usuario,
+        nombre: String,
+        correo: String,
+        contrasena: String?,
+        rol: Role,
+        actualizador: Usuario
     ) {
-         when (usuarioActual.rol) {
-            Role.Admin -> {
-                 if (usuarioExistente.rol == Role.Admin || usuarioExistente.rol == Role.SuperAdmin) {
-                    _mensaje.value = "No puedes modificar usuarios administradores"
-                    return
-                }
-                 if (nuevoRol == Role.Admin || nuevoRol == Role.SuperAdmin) {
-                    _mensaje.value = "No puedes asignar roles de administrador"
-                    return
-                }
-            }
-            Role.SuperAdmin -> {
-                // SuperAdmin puede modificar cualquier usuario
-                // No hay restricciones
-            }
-            else -> {
-                _mensaje.value = "No tienes permisos para gestionar usuarios"
-                return
-            }
+        if (!puedeEditar(actualizador, usuario, rol)) {
+            _mensaje.value = "No tienes permiso para modificar este usuario o asignar este rol"
+            return
         }
 
-         val usuarioActualizado = usuarioExistente.copy(
-            nombre = nuevoNombre,
-            correo = nuevoCorreo,
-            contrasena = nuevaContrasena ?: usuarioExistente.contrasena,
-            rol = nuevoRol
+        // Crear una copia actualizada del usuario
+        val usuarioActualizado = usuario.copy(
+            nombre = nombre,
+            correo = correo,
+            contrasena = contrasena ?: usuario.contrasena, // Mantener la original si no se provee una nueva
+            rol = rol
         )
 
-         UserRepository.eliminarUsuario(usuarioExistente.correo)
+        // Eliminar el usuario antiguo y agregar la versión actualizada
+        UserRepository.eliminarUsuario(usuario.correo)
         UserRepository.addUser(usuarioActualizado)
 
-        _mensaje.value = "Usuario actualizado exitosamente"
+        _mensaje.value = "Usuario actualizado con éxito"
         _operacionExitosa.value = true
     }
 
-    fun eliminarUsuario(usuario: Usuario, usuarioActual: Usuario) {
-         when (usuarioActual.rol) {
-            Role.Admin -> {
-                 if (usuario.rol == Role.Admin || usuario.rol == Role.SuperAdmin) {
-                    _mensaje.value = "No puedes eliminar usuarios administradores"
-                    return
-                }
-            }
-            Role.SuperAdmin -> {
-                 if (usuario.correo == usuarioActual.correo) {
-                    _mensaje.value = "No puedes eliminar tu propia cuenta"
-                    return
-                }
-            }
-            else -> {
-                _mensaje.value = "No tienes permisos para eliminar usuarios"
-                return
-            }
+    fun eliminarUsuario(usuario: Usuario, eliminador: Usuario) {
+        if (!puedeEliminar(eliminador, usuario)) {
+            _mensaje.value = "No tienes permiso para eliminar este usuario"
+            return
         }
-
-         UserRepository.eliminarUsuario(usuario.correo)
-        _mensaje.value = "Usuario eliminado exitosamente"
+        UserRepository.eliminarUsuario(usuario.correo)
+        _mensaje.value = "Usuario eliminado con éxito"
         _operacionExitosa.value = true
-        limpiarFormulario()
     }
 
-    private fun limpiarFormulario() {
-        _usuarioEncontrado.value = null
+    private fun puedeCrear(creador: Usuario, rolNuevo: Role): Boolean {
+        return when (creador.rol) {
+            Role.SuperAdmin -> true
+            Role.Admin -> rolNuevo != Role.SuperAdmin
+            else -> false
+        }
+    }
+
+    private fun puedeEditar(actualizador: Usuario, usuario: Usuario, rolNuevo: Role): Boolean {
+        return when (actualizador.rol) {
+            Role.SuperAdmin -> true
+            Role.Admin -> usuario.rol != Role.SuperAdmin && rolNuevo != Role.SuperAdmin
+            else -> false
+        }
+    }
+
+    private fun puedeEliminar(eliminador: Usuario, usuario: Usuario): Boolean {
+        return when (eliminador.rol) {
+            Role.SuperAdmin -> true
+            Role.Admin -> usuario.rol != Role.SuperAdmin
+            else -> false
+        }
     }
 }

@@ -22,9 +22,9 @@
         android:theme="@style/Theme.PrimerPrototipo">
 
         <service
-            android:name=".service.LocationForegroundService"
+            android:name=".model.LocationForegroundService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false" />
 
         <activity
             android:name=".view.LoginActivity"
