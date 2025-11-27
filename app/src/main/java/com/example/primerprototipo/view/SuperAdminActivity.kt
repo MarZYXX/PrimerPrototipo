@@ -10,8 +10,6 @@ import com.example.primerprototipo.model.Usuario
 class SuperAdminActivity : AppCompatActivity() {
 
     private lateinit var usuarioActual: Usuario
-    private lateinit var btnCerrar: Button
-    private lateinit var btnGestionarCuenta: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,8 +21,7 @@ class SuperAdminActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
-        btnGestionarCuenta = findViewById(R.id.gestionarCuenta)
-        btnCerrar = findViewById(R.id.closeSuperAdmin)
+         val btnGestionarCuenta: Button = findViewById(R.id.gestionarCuenta)
 
         btnGestionarCuenta.setOnClickListener {
             val intent = Intent(this, GestionCuentasActivity::class.java)
@@ -32,7 +29,8 @@ class SuperAdminActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        btnCerrar.setOnClickListener {
+        val btnCerrarSesion: Button = findViewById(R.id.closeSuperAdmin)
+        btnCerrarSesion.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)

@@ -14,6 +14,7 @@ class GestionCuentasActivity : AppCompatActivity() {
 
     private lateinit var viewModel: GestionarCuentasViewModel
 
+    // Views
     private lateinit var etCorreoBusqueda: EditText
     private lateinit var etNombre: EditText
     private lateinit var etCorreo: EditText
@@ -39,6 +40,8 @@ class GestionCuentasActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
+        initViewModel()
+
         initViewModel()
 
         etCorreoBusqueda = findViewById(R.id.editTextCorreo)

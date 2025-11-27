@@ -10,40 +10,68 @@ import com.example.primerprototipo.model.Usuario
 
 class AdminActivity : AppCompatActivity() {
 
-    private lateinit var btnManageAccounts: Button
-    private lateinit var txtBusView: TextView
-    private lateinit var txtBusCount: TextView
-    private lateinit var usuarioActual: Usuario
+    private lateinit var tvTitulo: TextView
+    private lateinit var btnGestionarCuenta: Button
     private lateinit var btnCerrarSesion: Button
+    private lateinit var tvAutobusesRuta: TextView
+    private lateinit var tvCantidadAutobuses: TextView
+
+    private lateinit var usuarioActual: Usuario
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin)
 
+        initViews()
+        leerDatosIntent()
+        setupListeners()
+        cargarDatosAdmin()
+    }
+
+    private fun initViews() {
+        tvTitulo = findViewById(R.id.busView)
+        btnGestionarCuenta = findViewById(R.id.manageAcc)
+        btnCerrarSesion = findViewById(R.id.admincerrar)
+        tvAutobusesRuta = findViewById(R.id.busView)
+        tvCantidadAutobuses = findViewById(R.id.textView2)
+    }
+
+    private fun leerDatosIntent() {
         usuarioActual = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("USUARIO_ACTUAL", Usuario::class.java)!!
         } else {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
-        btnManageAccounts = findViewById(R.id.manageAcc)
-        txtBusView = findViewById(R.id.busView)
-        txtBusCount = findViewById(R.id.textView2)
-        btnCerrarSesion = findViewById(R.id.admincerrar)
 
-        txtBusCount.text = "5"
+        tvTitulo.text = "Panel Admin: ${usuarioActual.nombre}"
+    }
 
-        btnManageAccounts.setOnClickListener {
-            val intent = Intent(this, GestionCuentasActivity::class.java)
-            intent.putExtra("USUARIO_ACTUAL", usuarioActual)
-            startActivity(intent)
+    private fun cargarDatosAdmin() {
+        // Datos de ejemplo para el dashboard del admin
+        tvCantidadAutobuses.text = "8" // 8 autobuses en ruta
+    }
+
+    private fun setupListeners() {
+        btnGestionarCuenta.setOnClickListener {
+            irAGestionCuentas()
         }
 
         btnCerrarSesion.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
+            cerrarSesion()
         }
+    }
+
+    private fun irAGestionCuentas() {
+        val intent = Intent(this, GestionCuentasActivity::class.java)
+        intent.putExtra("USUARIO_ACTUAL", usuarioActual)
+        startActivity(intent)
+    }
+
+    private fun cerrarSesion() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
     }
 }

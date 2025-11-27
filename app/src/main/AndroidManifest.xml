@@ -2,6 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,9 +21,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PrimerPrototipo">
 
+        <service
+            android:name=".service.LocationForegroundService"
+            android:enabled="true"
+            android:exported="true" />
 
         <activity
             android:name=".view.LoginActivity"
+            android:label="GPS-BUS Login"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,35 +37,18 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".view.RegistroActivity"
-            android:exported="false" />
 
-        <activity
-            android:name=".view.MapaActivity"
-            android:exported="false" />
+        <activity android:name=".view.RegistroActivity" android:label="Registro" />
+        <activity android:name=".view.MapaActivity" android:label="Mapa de Rutas" />
+        <activity android:name=".view.ChoferActivity" android:label="Panel Chofer" />
+        <activity android:name=".view.AdminActivity" android:label="Panel Admin" />
+        <activity android:name=".view.SuperAdminActivity" android:label="Super Admin" />
+        <activity android:name=".view.GestionCuentasActivity" android:label="Gestión de Cuentas" />
 
-        <activity
-            android:name=".view.AdminActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".view.SuperAdminActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".view.ChoferActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".view.GestionCuentasActivity"
-            android:exported="false"/>
-
+        <!-- Meta-data para Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="TU_API_KEY_AQUI" />
-
+            android:value="TU_API_KEY_DE_GOOGLE_MAPS_AQUI" />
 
     </application>
-
 </manifest>
