@@ -23,10 +23,10 @@ object FirebaseTest {
             .document(testUbicacion.autobusId)
             .set(testUbicacion)
             .addOnSuccessListener {
-                Log.d(TAG, "✅ Firebase conectado correctamente")
+                Log.d(TAG, " Firebase conectado correctamente")
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "❌ Error conectando a Firebase: ${e.message}")
+                Log.e(TAG, "Error conectando a Firebase: ${e.message}")
             }
     }
 }

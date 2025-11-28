@@ -42,8 +42,6 @@ class GestionCuentasActivity : AppCompatActivity() {
         }
         initViewModel()
 
-        initViewModel()
-
         etCorreoBusqueda = findViewById(R.id.editTextCorreo)
         etNombre = findViewById(R.id.etNombre)
         etCorreo = findViewById(R.id.etCorreo)
@@ -146,6 +144,10 @@ class GestionCuentasActivity : AppCompatActivity() {
         if (position >= 0) {
             spinnerRol.setSelection(position)
         }
+
+        etCorreo.isEnabled = false
+        etContrasena.isEnabled = false
+        etContrasena.hint = "No Edit"
     }
 
     private fun limpiarFormulario() {
@@ -153,6 +155,10 @@ class GestionCuentasActivity : AppCompatActivity() {
         etCorreo.setText("")
         etContrasena.setText("")
         usuarioEditando = null
+
+        etCorreo.isEnabled = true
+        etContrasena.isEnabled = true
+        etContrasena.hint = "contrasena"
     }
 
     private fun crearUsuario() {
@@ -167,15 +173,13 @@ class GestionCuentasActivity : AppCompatActivity() {
     private fun actualizarUsuario() {
         val usuario = usuarioEditando ?: return
         val nombre = etNombre.text.toString().trim()
-        val correo = etCorreo.text.toString().trim()
-        val contrasena = etContrasena.text.toString().trim()
+//        val correo = etCorreo.text.toString().trim()
+//        val contrasena = etContrasena.text.toString().trim()
         val rol = spinnerRol.selectedItem as Role
 
         viewModel.actualizarUsuario(
             usuario,
             nombre,
-            correo,
-            contrasena.ifEmpty { null },
             rol,
             usuarioActual
         )
