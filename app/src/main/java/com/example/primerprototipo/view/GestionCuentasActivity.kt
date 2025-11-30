@@ -2,6 +2,7 @@ package com.example.primerprototipo.view
 
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -13,10 +14,10 @@ import com.example.primerprototipo.viewmodel.GestionarCuentasViewModel
 class GestionCuentasActivity : AppCompatActivity() {
 
     private lateinit var viewModel: GestionarCuentasViewModel
-
-    // Views
     private lateinit var etCorreoBusqueda: EditText
     private lateinit var etNombre: EditText
+    private lateinit var etApellidoPaterno: EditText
+    private lateinit var etApellidoMaterno: EditText
     private lateinit var etCorreo: EditText
     private lateinit var etContrasena: EditText
     private lateinit var spinnerRol: Spinner
@@ -29,6 +30,10 @@ class GestionCuentasActivity : AppCompatActivity() {
 
     private lateinit var usuarioActual: Usuario
     private var usuarioEditando: Usuario? = null
+
+    private lateinit var layoutAsignacionBus: LinearLayout
+    private lateinit var etBusId: EditText
+    private lateinit var btnAsignarBus: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +49,8 @@ class GestionCuentasActivity : AppCompatActivity() {
 
         etCorreoBusqueda = findViewById(R.id.editTextCorreo)
         etNombre = findViewById(R.id.etNombre)
+        etApellidoPaterno = findViewById(R.id.etApellidoPaterno)
+        etApellidoMaterno = findViewById(R.id.etApellidoMaterno)
         etCorreo = findViewById(R.id.etCorreo)
         etContrasena = findViewById(R.id.etContrasena)
         spinnerRol = findViewById(R.id.spinnerRol)
@@ -53,6 +60,12 @@ class GestionCuentasActivity : AppCompatActivity() {
         btnEliminar = findViewById(R.id.btnEliminar)
         tvMensaje = findViewById(R.id.tvMensaje)
         btnFinalizar = findViewById(R.id.btnFinalizar)
+        layoutAsignacionBus = findViewById(R.id.layoutAsignacionBus)
+        etBusId = findViewById(R.id.etBusId)
+        btnAsignarBus = findViewById(R.id.btnAsignarBus)
+
+        btnActualizar.isEnabled = false
+        btnEliminar.isEnabled = false
 
         val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
 
@@ -92,6 +105,7 @@ class GestionCuentasActivity : AppCompatActivity() {
             setupSpinnerRoles(roles)
         }
 
+
         viewModel.usuarioEncontrado.observe(this) { usuario ->
             usuarioEditando = usuario
             if (usuario != null) {
@@ -99,6 +113,14 @@ class GestionCuentasActivity : AppCompatActivity() {
                 btnCrear.isEnabled = false
                 btnActualizar.isEnabled = true
                 btnEliminar.isEnabled = true
+
+                if(usuario.rol == Role.Chofer) {
+                    layoutAsignacionBus.visibility = View.VISIBLE
+                    viewModel.obtenerAsignacion(usuario.id)
+                } else {
+                    layoutAsignacionBus.visibility = View.GONE
+                }
+
             } else {
                 limpiarFormulario()
                 btnCrear.isEnabled = true
@@ -114,6 +136,14 @@ class GestionCuentasActivity : AppCompatActivity() {
         viewModel.operacionExitosa.observe(this) { exitoso ->
             if (exitoso) {
                 Toast.makeText(this, "Operación completada", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.busAsignado.observe(this){busId ->
+            if (busId != null){
+                etBusId.setText(busId)
+            }else{
+                etBusId.setText("")
             }
         }
     }
@@ -135,6 +165,8 @@ class GestionCuentasActivity : AppCompatActivity() {
 
     private fun cargarDatosUsuario(usuario: Usuario) {
         etNombre.setText(usuario.nombre)
+        etApellidoPaterno.setText(usuario.apellidoPaterno)
+        etApellidoMaterno.setText(usuario.apellidoMaterno)
         etCorreo.setText(usuario.correo)
         etContrasena.setText("")
 
@@ -152,6 +184,8 @@ class GestionCuentasActivity : AppCompatActivity() {
 
     private fun limpiarFormulario() {
         etNombre.setText("")
+        etApellidoPaterno.setText("")
+        etApellidoMaterno.setText("")
         etCorreo.setText("")
         etContrasena.setText("")
         usuarioEditando = null
@@ -163,23 +197,34 @@ class GestionCuentasActivity : AppCompatActivity() {
 
     private fun crearUsuario() {
         val nombre = etNombre.text.toString().trim()
+        val apellidoPaterno = etApellidoPaterno.text.toString().trim()
+        val apellidoMaterno = etApellidoMaterno.text.toString().trim()
         val correo = etCorreo.text.toString().trim()
         val contrasena = etContrasena.text.toString().trim()
         val rol = spinnerRol.selectedItem as Role
 
-        viewModel.crearUsuario(nombre, correo, contrasena, rol, usuarioActual)
+        viewModel.crearUsuario(
+            nombre,
+            correo,
+            apellidoPaterno,
+            apellidoMaterno,
+            contrasena,
+            rol,
+            usuarioActual)
     }
 
     private fun actualizarUsuario() {
         val usuario = usuarioEditando ?: return
         val nombre = etNombre.text.toString().trim()
-//        val correo = etCorreo.text.toString().trim()
-//        val contrasena = etContrasena.text.toString().trim()
+        val apellidoPaterno = etApellidoPaterno.text.toString().trim()
+        val apellidoMaterno = etApellidoMaterno.text.toString().trim()
         val rol = spinnerRol.selectedItem as Role
 
         viewModel.actualizarUsuario(
             usuario,
             nombre,
+            apellidoPaterno,
+            apellidoMaterno,
             rol,
             usuarioActual
         )

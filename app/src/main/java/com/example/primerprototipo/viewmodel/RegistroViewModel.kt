@@ -21,8 +21,7 @@ class RegistroViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val database = FirebaseFirestore.getInstance()
 
-    fun registro(nombre: String, correo: String, contrasena: String, confirmarContrasena: String) {
-        // Validaciones básicas
+    fun registro(nombre: String, apellidoPaterno: String, apellidoMaterno: String, correo: String, contrasena: String, confirmarContrasena: String) {
         if (nombre.isEmpty() || correo.isEmpty() || contrasena.isEmpty()) {
             _registroResult.value = RegistroResult.Error("Todos los campos son obligatorios")
             return
@@ -33,7 +32,6 @@ class RegistroViewModel : ViewModel() {
             return
         }
 
-        // Indicar que el proceso ha comenzado
         _isLoading.value = true
 
         auth.createUserWithEmailAndPassword(correo, contrasena).addOnSuccessListener {
@@ -42,6 +40,8 @@ class RegistroViewModel : ViewModel() {
             val nuevoUsuario = Usuario(
                 id = uid,
                 nombre = nombre,
+                apellidoPaterno = apellidoPaterno,
+                apellidoMaterno = apellidoMaterno,
                 correo = correo,
                 rol = Role.Usuario//
             )
@@ -49,6 +49,8 @@ class RegistroViewModel : ViewModel() {
             val usermap = hashMapOf(
                 "id" to uid,
                 "nombre" to nombre,
+                "apellidoPaterno" to apellidoPaterno,
+                "apellidoMaterno" to apellidoMaterno,
                 "correo" to correo,
                 "rol" to nuevoUsuario.rol.name
             )
@@ -63,26 +65,9 @@ class RegistroViewModel : ViewModel() {
                     _registroResult.value = RegistroResult.Error("Error al guardar el usuario en la base de datos")
                 }
 
-            // Verificar si el correo ya está en uso
-//            if (UserRepository.findUserByEmail(correo) != null) {
-//                _registroResult.value = RegistroResult.Error("El correo electrónico ya está en uso")
-//                _isLoading.value = false
-//                return
-//            }
-
-            // Agregar el usuario al repositorio
-            UserRepository.addUser(nuevoUsuario)
-
-//            // Simular un pequeño retraso (opcional, para visualización)
-//            // En una app real, aquí se haría la llamada a la red o a la base de datos
-//            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-//                _isLoading.value = false
-//                _registroResult.value = RegistroResult.Success(nuevoUsuario)
-//            }, 1000)
         }
     }
 
-    // Clases selladas para representar el resultado del registro
     sealed class RegistroResult {
         data class Success(val usuario: Usuario) : RegistroResult()
         data class Error(val mensaje: String) : RegistroResult()

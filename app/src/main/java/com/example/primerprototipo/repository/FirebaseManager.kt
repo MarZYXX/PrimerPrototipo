@@ -23,7 +23,7 @@ object FirebaseManager {
     fun updateBusLocation(autobus: Autobus) {
         val busLocation = UbicacionAutobus(
             autobusId = autobus.numeroUnidad,
-            choferId = autobus.id, // Asumiendo que el id del autobus es el id del chofer
+            choferId = autobus.id,
             ruta = autobus.ruta,
             latitud = autobus.latitud,
             longitud = autobus.longitud,
@@ -43,7 +43,6 @@ object FirebaseManager {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Manejar error
             }
         }
         database.addValueEventListener(listener!!)

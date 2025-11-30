@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.primerprototipo.model.AsignacionChofer
 import com.example.primerprototipo.model.Role
 import com.example.primerprototipo.model.Usuario
 import com.google.firebase.FirebaseApp
@@ -11,7 +12,6 @@ import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-// We use AndroidViewModel to get 'application' context for the secondary app trick
 class GestionarCuentasViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _usuarioEncontrado = MutableLiveData<Usuario?>()
@@ -31,7 +31,10 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
 
     private val db = FirebaseFirestore.getInstance()
 
-    // 1. BUSCAR USUARIO (READ)
+    private val asignacionBus = MutableLiveData<String?>()
+    val busAsignado: LiveData<String?> = asignacionBus
+
+
     fun buscarUsuario(correo: String) {
         _isLoading.value = true
 
@@ -42,13 +45,14 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
                 _isLoading.value = false
                 if (!documents.isEmpty) {
                     val doc = documents.documents[0]
-                    // Convert string role back to Enum safely
                     val rolString = doc.getString("rol") ?: "Usuario"
                     val rolEnum = try { Role.valueOf(rolString) } catch (e: Exception) { Role.Usuario }
 
                     val usuario = Usuario(
                         id = doc.id,
                         nombre = doc.getString("nombre") ?: "",
+                        apellidoPaterno = doc.getString("apellidoPaterno") ?: "",
+                        apellidoMaterno = doc.getString("apellidoMaterno") ?: "",
                         correo = doc.getString("correo") ?: "",
                         rol = rolEnum
                     )
@@ -74,18 +78,13 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
         _rolesDisponibles.value = roles
     }
 
-    // 2. CREAR USUARIO (CREATE)
-    fun crearUsuario(nombre: String, correo: String, contrasena: String, rol: Role, creador: Usuario) {
+    fun crearUsuario(nombre: String, correo: String, apellidoPaterno: String, apellidoMaterno: String, contrasena: String, rol: Role, creador: Usuario) {
         if (!puedeCrear(creador, rol)) {
             _mensaje.value = "No tienes permiso para crear este tipo de usuario"
             return
         }
 
         _isLoading.value = true
-
-        // TRUCO: Crear una "App Secundaria" de Firebase.
-        // Si usamos la instancia normal, al crear un usuario nuevo, Firebase desloguea al Admin automáticamente.
-        // Con esto, mantenemos al Admin logueado mientras creamos al otro usuario en segundo plano.
         val firebaseOptions = FirebaseOptions.Builder()
             .setApiKey(FirebaseApp.getInstance().options.apiKey)
             .setApplicationId(FirebaseApp.getInstance().options.applicationId)
@@ -106,23 +105,23 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
             .addOnSuccessListener { authResult ->
                 val uid = authResult.user?.uid ?: ""
 
-                // Preparar datos para Firestore
+                //  datos para Firestore DB
                 val userMap = hashMapOf(
                     "id" to uid,
                     "nombre" to nombre,
+                    "apellidoPaterno" to apellidoPaterno,
+                    "apellidoMaterno" to apellidoMaterno,
                     "correo" to correo,
                     "rol" to rol.name
                 )
 
-                // Guardar en Firestore (Usamos la DB principal)
+                // Guardar en DB
                 db.collection("usuarios").document(uid)
                     .set(userMap)
                     .addOnSuccessListener {
                         _isLoading.value = false
                         _mensaje.value = "Usuario creado con éxito"
                         _operacionExitosa.value = true
-
-                        // Importante: Cerrar sesión en la app secundaria para limpiar memoria
                         secondaryAuth.signOut()
                     }
                     .addOnFailureListener { e ->
@@ -136,10 +135,11 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
             }
     }
 
-    // 3. ACTUALIZAR USUARIO (UPDATE)
     fun actualizarUsuario(
         usuarioOriginal: Usuario,
         nuevoNombre: String,
+        nuevoApellidoPaterno: String,
+        nuevoApellidoMaterno: String,
         nuevoRol: Role,
         actualizador: Usuario
     ) {
@@ -150,10 +150,10 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
 
         _isLoading.value = true
 
-        // Nota: No actualizamos correo ni contraseña aquí porque requiere re-autenticación compleja.
-        // Solo actualizamos Nombre y Rol en la base de datos.
         val updates = mapOf(
             "nombre" to nuevoNombre,
+            "apellidoPaterno" to nuevoApellidoPaterno,
+            "apellidoMaterno" to nuevoApellidoMaterno,
             "rol" to nuevoRol.name
         )
 
@@ -164,7 +164,7 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
                 _mensaje.value = "Usuario actualizado con éxito"
                 _operacionExitosa.value = true
                 // Refrescar objeto local
-                _usuarioEncontrado.value = usuarioOriginal.copy(nombre = nuevoNombre, rol = nuevoRol)
+                _usuarioEncontrado.value = usuarioOriginal.copy(nombre = nuevoNombre, apellidoPaterno = nuevoApellidoPaterno, apellidoMaterno = nuevoApellidoMaterno, rol = nuevoRol)
             }
             .addOnFailureListener { e ->
                 _isLoading.value = false
@@ -172,7 +172,6 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
             }
     }
 
-    // 4. ELIMINAR USUARIO (DELETE)
     fun eliminarUsuario(usuario: Usuario, eliminador: Usuario) {
         if (!puedeEliminar(eliminador, usuario)) {
             _mensaje.value = "No tienes permiso para eliminar este usuario"
@@ -181,8 +180,6 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
 
         _isLoading.value = true
 
-        // Solo eliminamos de Firestore. El registro de Auth queda, pero sin documento en DB
-        // el usuario no podrá pasar del Login (porque el login busca el rol en DB).
         db.collection("usuarios").document(usuario.id)
             .delete()
             .addOnSuccessListener {
@@ -197,7 +194,6 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
             }
     }
 
-    // --- LÓGICA DE PERMISOS ---
     private fun puedeCrear(creador: Usuario, rolNuevo: Role): Boolean {
         return when (creador.rol) {
             Role.SuperAdmin -> true
@@ -220,5 +216,35 @@ class GestionarCuentasViewModel(application: Application) : AndroidViewModel(app
             Role.Admin -> usuario.rol != Role.SuperAdmin
             else -> false
         }
+    }
+
+    fun asignarAutobus(choferId: String, autobusID: String){
+        _isLoading.value = true
+
+        val asignacion = AsignacionChofer(choferId, autobusID)
+
+        db.collection("chofer de autobus").document(choferId)
+            .set(asignacion)
+            .addOnSuccessListener {
+                _isLoading.value = false
+                _mensaje.value = "Autobus $autobusID con éxito"
+                asignacionBus.value = autobusID
+            }
+            .addOnFailureListener{
+                _isLoading.value = false
+                _mensaje.value = "Error al asignar autobus: ${it.message}"
+        }
+    }
+
+    fun obtenerAsignacion(choferId: String) {
+        db.collection("chofer_de_autobus").document(choferId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val busId = document.getString("autobusId")
+                    asignacionBus.value = busId
+                } else {
+                    asignacionBus.value = null
+                }
+            }
     }
 }

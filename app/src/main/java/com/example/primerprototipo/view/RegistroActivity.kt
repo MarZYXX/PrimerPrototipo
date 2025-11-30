@@ -12,6 +12,9 @@ import com.example.primerprototipo.viewmodel.RegistroViewModel
 class RegistroActivity : AppCompatActivity() {
 
     private lateinit var etNombre: EditText
+    private lateinit var etApellidoPaterno: EditText
+    private lateinit var etApellidoMaterno: EditText
+
     private lateinit var etCorreo: EditText
     private lateinit var etContrasena: EditText
     private lateinit var etConfirmar: EditText
@@ -28,6 +31,8 @@ class RegistroActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
 
         etNombre = findViewById(R.id.etNombre)
+        etApellidoPaterno = findViewById(R.id.editTextAPP)
+        etApellidoMaterno = findViewById(R.id.editTextAPM)
         etCorreo = findViewById(R.id.etCorreoRegistro)
         etContrasena = findViewById(R.id.etContrasenaRegistro)
         etConfirmar = findViewById(R.id.etConfirmarContrasena)
@@ -39,11 +44,13 @@ class RegistroActivity : AppCompatActivity() {
 
         btnRegistrar.setOnClickListener {
             val nombre = etNombre.text.toString().trim()
+            val apellidoPaterno = etApellidoPaterno.text.toString().trim()
+            val apellidoMaterno = etApellidoMaterno.text.toString().trim()
             val correo = etCorreo.text.toString().trim()
             val pass = etContrasena.text.toString().trim()
             val confirmar = etConfirmar.text.toString().trim()
 
-            viewModel.registro(nombre, correo, pass, confirmar)
+            viewModel.registro(nombre, apellidoPaterno, apellidoMaterno, correo, pass, confirmar)
         }
 
         tvVolverLogin.setOnClickListener {

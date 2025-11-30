@@ -28,6 +28,19 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/tvBusInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Cargando asignación de unidad..."
+            android:textSize="16sp"
+            android:textColor="@android:color/holo_orange_dark"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textChofer" />
+
+        <TextView
             android:id="@+id/tvLabelTerminal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,7 +49,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textChofer" />
+            app:layout_constraintTop_toBottomOf="@id/tvBusInfo" />
 
         <Spinner
             android:id="@+id/spinnerTerminal"
@@ -85,7 +98,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvTerminalDestino">
 
-            <!-- Horario de Salida -->
+
             <TextView
                 android:id="@+id/choferSalida"
                 android:layout_width="wrap_content"
@@ -239,6 +252,20 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnFinalizarRuta" />
+
+            <Button
+                android:id="@+id/btnCerrarSesionGlobal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:backgroundTint="@android:color/darker_gray"
+                android:text="Cerrar Sesión"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layoutControles" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

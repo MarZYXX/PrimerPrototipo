@@ -6,12 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
@@ -24,16 +19,11 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    // Vistas
     private lateinit var tvTituloChofer: TextView
     private lateinit var spinnerTerminal: Spinner
     private lateinit var tvNombreRuta: TextView
@@ -49,13 +39,15 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var btnFinalizarRuta: Button
     private lateinit var btnCerrarSesion: Button
     private lateinit var layoutControles: View
-
-    // ViewModel y datos
+    private lateinit var tvBusInfo: TextView
     private lateinit var viewModel: ChoferViewModel
     private lateinit var usuarioActual: Usuario
     private var rutaConfigurada = false
+    private var busIdAsignado: String? = null
+    private lateinit var btnCerrarSesionN: Button
 
-    // Mapa
+    private val db = FirebaseFirestore.getInstance()
+
     private lateinit var mMap: GoogleMap
     private var busMarker: Marker? = null
     private var mapFragment: SupportMapFragment? = null
@@ -68,12 +60,13 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_chofer)
 
+        leerDatosIntent()
         initViewModel()
         initViews()
         initMap()
-        leerDatosIntent()
-        setupObservers()
+        asignacionAutobus()
         inicializarDatos()
+        setupObservers()
         configurarSpinnerTerminal()
         configurarSpinnerHorario()
         setupListeners()
@@ -115,6 +108,8 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         btnFinalizarRuta = findViewById(R.id.btnFinalizarRuta)
         btnCerrarSesion = findViewById(R.id.sesionChofer)
         layoutControles = findViewById(R.id.layoutControles)
+        tvBusInfo = findViewById(R.id.tvBusInfo)
+        btnCerrarSesionN = findViewById(R.id.btnCerrarSesionGlobal)
         mostrarControles(false)
     }
 
@@ -128,8 +123,31 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun inicializarDatos() {
-        viewModel.inicializarAutobus(usuarioActual.nombre)
         tvTituloChofer.text = "Bienvenido Chofer: ${usuarioActual.nombre}"
+        viewModel.inicializarAutobus(usuarioActual.nombre)
+    }
+    private fun asignacionAutobus() {
+        tvBusInfo.text = "Buscando asignación..."
+
+        db.collection("chofer de autobus").document(usuarioActual.id)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    busIdAsignado = document.getString("autobusId")
+                    tvBusInfo.text = "Unidad asignada: $busIdAsignado"
+
+                    viewModel.inicializarAutobus(busIdAsignado ?: "Desconocido")
+                } else {
+                    busIdAsignado = null
+                    tvBusInfo.text = "⚠ No tienes autobús asignado."
+                    tvBusInfo.setTextColor(Color.RED)
+                    spinnerTerminal.isEnabled = false
+                    Toast.makeText(this, "Contacta al administrador para asignación", Toast.LENGTH_LONG).show()
+                }
+            }
+            .addOnFailureListener {
+                tvBusInfo.text = "Error de conexión."
+            }
     }
 
     private fun configurarSpinnerTerminal() {
@@ -144,6 +162,12 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (position == 0) return
                 if (!rutaConfigurada) {
+                    if (busIdAsignado == null) {
+                        Toast.makeText(this@ChoferActivity, "No tienes unidad asignada", Toast.LENGTH_SHORT).show()
+                        spinnerTerminal.setSelection(0)
+                        return
+                    }
+
                     val terminalSeleccionada = Terminal.values()[position - 1]
                     viewModel.configurarTerminalSalida(terminalSeleccionada)
                     rutaConfigurada = true
@@ -213,6 +237,9 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         btnParadaAnterior.setOnClickListener { viewModel.retrocederParada() }
         btnFinalizarRuta.setOnClickListener { viewModel.finalizarRuta() }
         btnCerrarSesion.setOnClickListener { cerrarSesion() }
+        btnCerrarSesionN.setOnClickListener {
+            cerrarSesion()
+        }
     }
 
     private fun cerrarSesion() {
@@ -230,9 +257,14 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun iniciarServicioDeUbicacion() {
+        if (busIdAsignado == null) {
+            Toast.makeText(this, "Error: No hay autobús asignado", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val intent = Intent(this, LocationForegroundService::class.java).apply {
             putExtra("CHOFER_ID", usuarioActual.id)
-            putExtra("AUTOBUS_ID", viewModel.autobus.value?.numeroUnidad)
+            putExtra("AUTOBUS_ID", busIdAsignado)
             putExtra("RUTA_ID", viewModel.autobus.value?.ruta)
         }
         startService(intent)
@@ -280,9 +312,9 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permiso concedido.
+                Toast.makeText(this, "Permisos de ubicación concedidos", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "El permiso de ubicación es necesario para el rastreo.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Permisos necesarios para operar", Toast.LENGTH_LONG).show()
             }
         }
     }

@@ -46,23 +46,6 @@ class LoginViewModel : ViewModel() {
                 _loginResult.value = LoginResult.Error("Error al iniciar sesión: ${e.message}")
             }
 
-//         Thread {
-//            try {
-//                Thread.sleep(1000) // Simular delay de red
-//
-//                 val usuario = UserRepository.findUserByEmail(correo)
-//
-//                if (usuario != null && usuario.contrasena == contrasena) {
-//                    _loginResult.postValue(LoginResult.Success(usuario))
-//                } else {
-//                    _loginResult.postValue(LoginResult.Error("Correo o contraseña incorrectos"))
-//                }
-//            } catch (e: Exception) {
-//                _loginResult.postValue(LoginResult.Error("Error de conexión"))
-//            } finally {
-//                _isLoading.postValue(false)
-//            }
-//        }.start()
     }
 
     private fun recuperarRolUsuario(uid: String) {
@@ -80,6 +63,8 @@ class LoginViewModel : ViewModel() {
                         val usuario = Usuario(
                             id = uid,
                             nombre = document.getString("nombre") ?: "Usuario",
+                            apellidoPaterno = document.getString("apellidoPaterno")?: "",
+                            apellidoMaterno = document.getString("apellidoMaterno")?: "",
                             correo = document.getString("correo") ?: "",
                             rol = rolEnum
                         )
