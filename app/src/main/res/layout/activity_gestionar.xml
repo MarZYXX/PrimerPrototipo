@@ -187,20 +187,49 @@
             app:layout_constraintStart_toEndOf="@+id/textView7"
             app:layout_constraintTop_toTopOf="@+id/textView7" />
 
-        <!-- FIXED: layoutAsignacionBus -->
-        <!-- Uses match_parent width (via constraints), wrap_content height -->
-        <!-- Reorganized order: Label -> Input -> Button -->
+        <!-- === INICIO: NUEVO BLOQUE PARA DATOS DEL CHOFER === -->
+        <LinearLayout
+            android:id="@+id/layoutDatosChofer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/spinnerRol"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible">
+
+            <EditText
+                android:id="@+id/etNumeroLicencia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Número de Licencia"
+                android:inputType="text"
+                android:minHeight="48dp" />
+
+            <EditText
+                android:id="@+id/etTelefonoEmergencia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Teléfono de Emergencia"
+                android:inputType="phone"
+                android:minHeight="48dp"/>
+
+        </LinearLayout>
+        <!-- === FIN: NUEVO BLOQUE PARA DATOS DEL CHOFER === -->
+
         <LinearLayout
             android:id="@+id/layoutAsignacionBus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinnerRol"
+            app:layout_constraintTop_toBottomOf="@+id/layoutDatosChofer"
             tools:visibility="visible">
 
             <TextView
@@ -229,7 +258,6 @@
 
         </LinearLayout>
 
-        <!-- FIXED: Buttons constrained to layoutAsignacionBus so they move together -->
         <Button
             android:id="@+id/btnCrear"
             android:layout_width="0dp"

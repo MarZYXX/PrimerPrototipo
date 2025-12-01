@@ -119,6 +119,13 @@
                 app:layout_constraintStart_toEndOf="@id/choferSalida"
                 app:layout_constraintTop_toTopOf="@id/choferSalida" />
 
+
+            <ProgressBar
+                android:id="@+id/progressBarChofer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
             <!-- Pasajeros -->
             <TextView
                 android:id="@+id/pasajerosAbordo"

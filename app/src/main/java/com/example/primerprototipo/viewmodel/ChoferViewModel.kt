@@ -5,16 +5,26 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.primerprototipo.model.Autobus
+import com.example.primerprototipo.model.Chofer // Importamos el nuevo modelo
 import com.example.primerprototipo.model.HorariosRuta
 import com.example.primerprototipo.model.Parada
 import com.example.primerprototipo.model.RutasMisantla
 import com.example.primerprototipo.model.Terminal
+import com.example.primerprototipo.repository.ChoferRepository // Importamos el nuevo repositorio
 import com.example.primerprototipo.repository.DirectionsRepository
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 
 class ChoferViewModel : ViewModel() {
 
+    // --- LiveData para datos del Chofer y estado de la carga ---
+    private val _chofer = MutableLiveData<Chofer?>()
+    val chofer: LiveData<Chofer?> = _chofer
+
+    private val _estadoCarga = MutableLiveData<EstadoCarga>()
+    val estadoCarga: LiveData<EstadoCarga> = _estadoCarga
+
+    // --- LiveData existentes ---
     private val _accionServicio = MutableLiveData<AccionServicio>()
     val accionServicio: LiveData<AccionServicio> = _accionServicio
 
@@ -50,6 +60,28 @@ class ChoferViewModel : ViewModel() {
 
     private var paradaActualIndex = 0
     private var paradasRuta: List<Parada> = emptyList()
+
+    // --- Nueva función para cargar los datos del chofer ---
+    fun cargarDatosChofer(choferId: String) {
+        _estadoCarga.value = EstadoCarga.CARGANDO
+        viewModelScope.launch {
+            val resultado = ChoferRepository.getChofer(choferId)
+            resultado.onSuccess { choferData ->
+                if (choferData != null) {
+                    _chofer.postValue(choferData)
+                    _estadoCarga.postValue(EstadoCarga.EXITO)
+                    // Una vez cargado, inicializamos el panel con su nombre
+                    inicializarAutobus(choferData.nombre)
+                } else {
+                    _estadoCarga.postValue(EstadoCarga.ERROR("No se encontraron datos para el chofer."))
+                }
+            }.onFailure { error ->
+                _estadoCarga.postValue(EstadoCarga.ERROR(error.message ?: "Error desconocido"))
+            }
+        }
+    }
+
+    // --- Tus funciones existentes (sin cambios) ---
 
     fun inicializarAutobus(nombreChofer: String) {
         _mensaje.value = "Bienvenido, $nombreChofer. Selecciona tu terminal de salida"
@@ -185,8 +217,16 @@ class ChoferViewModel : ViewModel() {
         _capacidadDisponible.value = "$disponible asientos disponibles"
     }
 
+    // --- Clases internas para manejar estados ---
+
     sealed class AccionServicio {
         object INICIAR : AccionServicio()
         object DETENER : AccionServicio()
+    }
+
+    sealed class EstadoCarga {
+        object CARGANDO : EstadoCarga()
+        object EXITO : EstadoCarga()
+        data class ERROR(val mensaje: String) : EstadoCarga()
     }
 }

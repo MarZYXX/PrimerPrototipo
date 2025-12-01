@@ -6,7 +6,13 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
@@ -19,7 +25,12 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -45,6 +56,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     private var rutaConfigurada = false
     private var busIdAsignado: String? = null
     private lateinit var btnCerrarSesionN: Button
+    private lateinit var progressBar: ProgressBar
 
     private val db = FirebaseFirestore.getInstance()
 
@@ -62,10 +74,9 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
 
         leerDatosIntent()
         initViewModel()
+        viewModel.cargarDatosChofer(usuarioActual.id)
         initViews()
         initMap()
-        asignacionAutobus()
-        inicializarDatos()
         setupObservers()
         configurarSpinnerTerminal()
         configurarSpinnerHorario()
@@ -110,6 +121,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         layoutControles = findViewById(R.id.layoutControles)
         tvBusInfo = findViewById(R.id.tvBusInfo)
         btnCerrarSesionN = findViewById(R.id.btnCerrarSesionGlobal)
+        progressBar = findViewById(R.id.progressBarChofer)
         mostrarControles(false)
     }
 
@@ -121,22 +133,17 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
     }
-
-    private fun inicializarDatos() {
-        tvTituloChofer.text = "Bienvenido Chofer: ${usuarioActual.nombre}"
-        viewModel.inicializarAutobus(usuarioActual.nombre)
-    }
-    private fun asignacionAutobus() {
-        tvBusInfo.text = "Buscando asignación..."
+    private fun buscarAsignacionAutobus() {
+        tvBusInfo.text = "Buscando asignación de unidad..."
+        progressBar.visibility = View.VISIBLE
 
         db.collection("chofer de autobus").document(usuarioActual.id)
             .get()
             .addOnSuccessListener { document ->
+                progressBar.visibility = View.GONE
                 if (document.exists()) {
                     busIdAsignado = document.getString("autobusId")
                     tvBusInfo.text = "Unidad asignada: $busIdAsignado"
-
-                    viewModel.inicializarAutobus(busIdAsignado ?: "Desconocido")
                 } else {
                     busIdAsignado = null
                     tvBusInfo.text = "⚠ No tienes autobús asignado."
@@ -146,6 +153,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
             .addOnFailureListener {
+                progressBar.visibility = View.GONE
                 tvBusInfo.text = "Error de conexión."
             }
     }
@@ -203,6 +211,31 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setupObservers() {
+
+        viewModel.estadoCarga.observe(this) { estado ->
+            when (estado) {
+                is ChoferViewModel.EstadoCarga.CARGANDO -> {
+                    progressBar.visibility = View.VISIBLE
+                    tvBusInfo.text = "Cargando datos del chofer..."
+                }
+                is ChoferViewModel.EstadoCarga.EXITO -> {
+                    progressBar.visibility = View.GONE
+                }
+                is ChoferViewModel.EstadoCarga.ERROR -> {
+                    progressBar.visibility = View.GONE
+                    Toast.makeText(this, "Error: ${estado.mensaje}", Toast.LENGTH_LONG).show()
+                    tvBusInfo.text = "Error al cargar datos."
+                }
+            }
+        }
+
+        viewModel.chofer.observe(this) { chofer ->
+            if (chofer != null) {
+                tvTituloChofer.text = "Bienvenido Chofer: ${chofer.nombre}"
+                buscarAsignacionAutobus()
+            }
+        }
+
         viewModel.pasajerosAbordo.observe(this) { tvNumPasajeros.text = it.toString() }
         viewModel.proximaParada.observe(this) { tvProximaParada.text = it }
         viewModel.capacidadDisponible.observe(this) { tvCapacidadDisponible.text = it }

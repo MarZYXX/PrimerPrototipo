@@ -1,8 +1,8 @@
-package com.example.primerprototipo.viewmodel
+package com.example.primerprototipo.repository
 
 import com.example.primerprototipo.model.Usuario
 
-object serRepository {
+object UserRepository {
     private val users = mutableListOf<Usuario>()
 
 

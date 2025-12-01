@@ -31,6 +31,10 @@ class GestionCuentasActivity : AppCompatActivity() {
     private lateinit var usuarioActual: Usuario
     private var usuarioEditando: Usuario? = null
 
+    // --- Vistas para Chofer ---
+    private lateinit var layoutDatosChofer: LinearLayout
+    private lateinit var etNumeroLicencia: EditText
+    private lateinit var etTelefonoEmergencia: EditText
     private lateinit var layoutAsignacionBus: LinearLayout
     private lateinit var etBusId: EditText
     private lateinit var btnAsignarBus: Button
@@ -39,14 +43,23 @@ class GestionCuentasActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gestionar)
 
-         usuarioActual = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        usuarioActual = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("USUARIO_ACTUAL", Usuario::class.java)!!
         } else {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("USUARIO_ACTUAL") as Usuario
         }
+
+        initViews()
         initViewModel()
 
+        val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
+        viewModel.cargarRolesDisponibles(esSuperAdmin)
+
+        setupListeners()
+    }
+
+    private fun initViews() {
         etCorreoBusqueda = findViewById(R.id.editTextCorreo)
         etNombre = findViewById(R.id.etNombre)
         etApellidoPaterno = findViewById(R.id.etApellidoPaterno)
@@ -60,43 +73,18 @@ class GestionCuentasActivity : AppCompatActivity() {
         btnEliminar = findViewById(R.id.btnEliminar)
         tvMensaje = findViewById(R.id.tvMensaje)
         btnFinalizar = findViewById(R.id.btnFinalizar)
+
+        // Vistas de Chofer
+        layoutDatosChofer = findViewById(R.id.layoutDatosChofer)
+        etNumeroLicencia = findViewById(R.id.etNumeroLicencia)
+        etTelefonoEmergencia = findViewById(R.id.etTelefonoEmergencia)
         layoutAsignacionBus = findViewById(R.id.layoutAsignacionBus)
         etBusId = findViewById(R.id.etBusId)
         btnAsignarBus = findViewById(R.id.btnAsignarBus)
 
         btnActualizar.isEnabled = false
         btnEliminar.isEnabled = false
-
-        val esSuperAdmin = usuarioActual.rol == Role.SuperAdmin
-
-        viewModel.cargarRolesDisponibles(esSuperAdmin)
-
-        btnBuscar.setOnClickListener {
-            val correo = etCorreoBusqueda.text.toString().trim()
-            viewModel.buscarUsuario(correo)
-        }
-
-        btnCrear.setOnClickListener {
-            crearUsuario()
-        }
-
-        btnActualizar.setOnClickListener {
-            actualizarUsuario()
-        }
-
-        btnEliminar.setOnClickListener {
-            eliminarUsuario()
-        }
-
-        btnFinalizar.setOnClickListener {
-            finish()
-        }
-
-        btnActualizar.isEnabled = false
-        btnEliminar.isEnabled = false
-
     }
-
 
     private fun initViewModel() {
         viewModel = ViewModelProvider(this)[GestionarCuentasViewModel::class.java]
@@ -105,7 +93,6 @@ class GestionCuentasActivity : AppCompatActivity() {
             setupSpinnerRoles(roles)
         }
 
-
         viewModel.usuarioEncontrado.observe(this) { usuario ->
             usuarioEditando = usuario
             if (usuario != null) {
@@ -113,20 +100,13 @@ class GestionCuentasActivity : AppCompatActivity() {
                 btnCrear.isEnabled = false
                 btnActualizar.isEnabled = true
                 btnEliminar.isEnabled = true
-
-                if(usuario.rol == Role.Chofer) {
-                    layoutAsignacionBus.visibility = View.VISIBLE
-                    viewModel.obtenerAsignacion(usuario.id)
-                } else {
-                    layoutAsignacionBus.visibility = View.GONE
-                }
-
             } else {
                 limpiarFormulario()
                 btnCrear.isEnabled = true
                 btnActualizar.isEnabled = false
                 btnEliminar.isEnabled = false
             }
+            actualizarVisibilidadChofer(spinnerRol.selectedItem as? Role)
         }
 
         viewModel.mensaje.observe(this) { mensaje ->
@@ -140,14 +120,48 @@ class GestionCuentasActivity : AppCompatActivity() {
         }
 
         viewModel.busAsignado.observe(this){busId ->
-            if (busId != null){
-                etBusId.setText(busId)
-            }else{
-                etBusId.setText("")
-            }
+            etBusId.setText(busId ?: "")
         }
     }
 
+    private fun setupListeners() {
+        btnBuscar.setOnClickListener {
+            val correo = etCorreoBusqueda.text.toString().trim()
+            if (correo.isNotEmpty()) viewModel.buscarUsuario(correo)
+        }
+        btnCrear.setOnClickListener { crearUsuario() }
+        btnActualizar.setOnClickListener { actualizarUsuario() }
+        btnEliminar.setOnClickListener { eliminarUsuario() }
+        btnFinalizar.setOnClickListener { finish() }
+
+        // CONECTAMOS EL BOTÓN DE ASIGNAR BUS
+        btnAsignarBus.setOnClickListener {
+            val busId = etBusId.text.toString().trim()
+            if (usuarioEditando != null && busId.isNotEmpty()) {
+                viewModel.asignarAutobus(usuarioEditando!!.id, busId)
+            } else {
+                Toast.makeText(this, "Primero busca a un chofer y después especifica un Bus ID.", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        spinnerRol.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val rolSeleccionado = parent?.getItemAtPosition(position) as? Role
+                actualizarVisibilidadChofer(rolSeleccionado)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun actualizarVisibilidadChofer(rol: Role?) {
+        val esChofer = rol == Role.Chofer
+        layoutDatosChofer.visibility = if (esChofer) View.VISIBLE else View.GONE
+        layoutAsignacionBus.visibility = if (esChofer && usuarioEditando != null) View.VISIBLE else View.GONE
+
+        if (esChofer && usuarioEditando != null) {
+            viewModel.obtenerAsignacion(usuarioEditando!!.id)
+        }
+    }
 
     private fun setupSpinnerRoles(roles: List<Role>) {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, roles)
@@ -157,9 +171,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         if (usuarioEditando == null) {
             val defaultRole = if (roles.contains(Role.Usuario)) Role.Usuario else roles.first()
             val position = roles.indexOf(defaultRole)
-            if (position >= 0) {
-                spinnerRol.setSelection(position)
-            }
+            if (position >= 0) spinnerRol.setSelection(position)
         }
     }
 
@@ -173,13 +185,11 @@ class GestionCuentasActivity : AppCompatActivity() {
         val rolActual = usuario.rol
         val adapter = spinnerRol.adapter as ArrayAdapter<Role>
         val position = adapter.getPosition(rolActual)
-        if (position >= 0) {
-            spinnerRol.setSelection(position)
-        }
+        if (position >= 0) spinnerRol.setSelection(position)
 
         etCorreo.isEnabled = false
         etContrasena.isEnabled = false
-        etContrasena.hint = "No Edit"
+        etContrasena.hint = "No se puede editar"
     }
 
     private fun limpiarFormulario() {
@@ -188,11 +198,18 @@ class GestionCuentasActivity : AppCompatActivity() {
         etApellidoMaterno.setText("")
         etCorreo.setText("")
         etContrasena.setText("")
+        etNumeroLicencia.setText("")
+        etTelefonoEmergencia.setText("")
         usuarioEditando = null
 
         etCorreo.isEnabled = true
         etContrasena.isEnabled = true
-        etContrasena.hint = "contrasena"
+        etContrasena.hint = "Contraseña"
+        btnCrear.isEnabled = true
+        btnActualizar.isEnabled = false
+        btnEliminar.isEnabled = false
+
+        actualizarVisibilidadChofer(spinnerRol.selectedItem as? Role)
     }
 
     private fun crearUsuario() {
@@ -203,14 +220,15 @@ class GestionCuentasActivity : AppCompatActivity() {
         val contrasena = etContrasena.text.toString().trim()
         val rol = spinnerRol.selectedItem as Role
 
+        val numeroLicencia = etNumeroLicencia.text.toString().trim()
+        val telefonoEmergencia = etTelefonoEmergencia.text.toString().trim()
+
         viewModel.crearUsuario(
-            nombre,
-            correo,
-            apellidoPaterno,
-            apellidoMaterno,
-            contrasena,
-            rol,
-            usuarioActual)
+            nombre, apellidoPaterno, apellidoMaterno, correo,
+            contrasena, rol, usuarioActual,
+            numeroLicencia.takeIf { rol == Role.Chofer },
+            telefonoEmergencia.takeIf { rol == Role.Chofer }
+        )
     }
 
     private fun actualizarUsuario() {
@@ -220,13 +238,20 @@ class GestionCuentasActivity : AppCompatActivity() {
         val apellidoMaterno = etApellidoMaterno.text.toString().trim()
         val rol = spinnerRol.selectedItem as Role
 
+        // --- RECOGEMOS LOS DATOS DEL CHOFER ---
+        val numeroLicencia = etNumeroLicencia.text.toString().trim()
+        val telefonoEmergencia = etTelefonoEmergencia.text.toString().trim()
+
         viewModel.actualizarUsuario(
-            usuario,
-            nombre,
-            apellidoPaterno,
-            apellidoMaterno,
-            rol,
-            usuarioActual
+            usuarioOriginal = usuario,
+            nuevoNombre = nombre,
+            nuevoApellidoPaterno = apellidoPaterno,
+            nuevoApellidoMaterno = apellidoMaterno,
+            nuevoRol = rol,
+            actualizador = usuarioActual,
+            // --- Y LOS PASAMOS AL VIEWMODEL ---
+            numeroLicencia = numeroLicencia.takeIf { rol == Role.Chofer },
+            telefonoEmergencia = telefonoEmergencia.takeIf { rol == Role.Chofer }
         )
     }
 
