@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "514220049202",
+    "project_id": "gps-bus-misantla-e3400",
+    "storage_bucket": "gps-bus-misantla-e3400.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514220049202:android:8a822c8cdc5cdf49550d2b",
+        "android_client_info": {
+          "package_name": "com.example.primerprototipo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkt1KSapExL1yr3XCoQqA-FyHDkRCndVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
