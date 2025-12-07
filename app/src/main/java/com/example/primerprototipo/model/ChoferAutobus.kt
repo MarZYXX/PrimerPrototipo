@@ -5,5 +5,3 @@ data class AsignacionChofer(
     val autobusId: String = "",
     val fechaAsignacion: Long = System.currentTimeMillis()
 )
-
-//Test

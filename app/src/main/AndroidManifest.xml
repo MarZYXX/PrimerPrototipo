@@ -17,6 +17,9 @@
     <!-- Permiso para notificaciones (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- AGREGA ESTA LÍNEA: -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
     <!-- Feature de ubicación (opcional pero recomendado) -->
     <uses-feature
         android:name="android.hardware.location.gps"
@@ -37,7 +40,7 @@
         <!-- IMPORTANTE: Reemplaza YOUR_GOOGLE_MAPS_API_KEY con tu API Key real -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
+            android:value="AIzaSyC0ij7ZfnTiTGCQtuOZeNK8QHAQU7qXz7I" />
 
         <!-- ========== ACTIVITIES ========== -->
 
@@ -78,8 +81,7 @@
         <!-- Activity de SuperAdmin -->
         <activity
             android:name=".view.SuperAdminActivity"
-            android:exported="false"
-            android:parentActivityName=".view.LoginActivity" />
+            android:exported="false"            android:parentActivityName=".view.LoginActivity" />
 
         <!-- Activity de Gestión de Cuentas -->
         <activity
