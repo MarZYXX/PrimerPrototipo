@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.primerprototipo.R
 import com.example.primerprototipo.model.Usuario
 
-class AdminActivity : AppCompatActivity() {
+class   AdminActivity : AppCompatActivity() {
 
     private lateinit var tvTitulo: TextView
     private lateinit var btnGestionarCuenta: Button

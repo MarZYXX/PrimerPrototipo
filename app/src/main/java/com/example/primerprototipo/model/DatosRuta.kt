@@ -1,12 +1,21 @@
 package com.example.primerprototipo.model
 
+import com.google.android.gms.maps.model.LatLng
+
+// Representa una parada o punto de interés en la ruta.
 data class Parada(
     val nombre: String,
     val latitud: Double,
-    val longitud: Double,
-    val orden: Int
+    val longitud: Double
 )
 
+// Contiene la información completa de una ruta dinámica calculada por la API.
+data class Ruta(
+    val polyline: List<LatLng>,
+    val paradas: List<Parada>
+)
+
+// Define las terminales principales de la ruta.
 enum class Terminal(val nombreCompleto: String) {
     MISANTLA("Terminal Misantla"),
     MARTINEZ("Terminal Martínez de la Torre");
@@ -14,55 +23,14 @@ enum class Terminal(val nombreCompleto: String) {
     override fun toString(): String = nombreCompleto
 }
 
+// Objeto de utilidad para gestionar la información de las rutas.
 object RutasMisantla {
 
-    // Ruta Misantla -> Martínez (PARADAS REALES Y COMPLETAS)
-    val paradasMisantlaMartinez = listOf(
-        Parada("Terminal Misantla", 19.9319, -96.8461, 1),
-        Parada("Santa Cruz", 19.9350, -96.8400, 2),
-        Parada("Desviación", 19.9380, -96.8350, 3),
-        Parada("Primavera", 19.9420, -96.8320, 4),
-        Parada("Arroyo Hondo", 19.9450, -96.8300, 5),
-        Parada("San Francisco", 19.9500, -96.8250, 6),
-        Parada("Santa Clara", 19.9550, -96.8200, 7),
-        Parada("Coapeche", 19.9800, -96.7900, 8),
-        Parada("Palpuala Ixcan", 20.0100, -96.7600, 9),
-        Parada("Libertad", 20.0300, -96.7400, 10),
-        Parada("Plan de Limón", 20.0450, -96.7200, 11),
-        Parada("Independencia", 20.0600, -96.7000, 12),
-        Parada("Terminal Martínez de la Torre", 20.0667, -97.0667, 13)
-    )
+    // Direcciones exactas para que la API de Google Maps calcule la ruta correcta.
+    private const val DIRECCION_TERMINAL_MISANTLA = "ADO Misantla Ezequiel Alatriste 1120-122, Centro, 93820 Misantla, Ver."
+    private const val DIRECCION_TERMINAL_MARTINEZ = "ADO Martinez de la Torre Melchor Ocampo 501 Ote, Centro, 93600 Martínez de la Torre, Ver."
 
-    // Ruta Martínez -> Misantla (ORDEN INVERSO)
-    val paradasMartinezMisantla = listOf(
-        Parada("Terminal Martínez de la Torre", 20.0667, -97.0667, 1),
-        Parada("Independencia", 20.0600, -96.7000, 2),
-        Parada("Plan de Limón", 20.0450, -96.7200, 3),
-        Parada("Libertad", 20.0300, -96.7400, 4),
-        Parada("Palpuala Ixcan", 20.0100, -96.7600, 5),
-        Parada("Coapeche", 19.9800, -96.7900, 6),
-        Parada("Santa Clara", 19.9550, -96.8200, 7),
-        Parada("San Francisco", 19.9500, -96.8250, 8),
-        Parada("Arroyo Hondo", 19.9450, -96.8300, 9),
-        Parada("Primavera", 19.9420, -96.8320, 10),
-        Parada("Desviación", 19.9380, -96.8350, 11),
-        Parada("Santa Cruz", 19.9350, -96.8400, 12),
-        Parada("Terminal Misantla", 19.9319, -96.8461, 13)
-    )
-
-    /**
-     * Obtiene las paradas según la terminal de salida seleccionada
-     */
-    fun obtenerParadasPorTerminal(terminal: Terminal): List<Parada> {
-        return when (terminal) {
-            Terminal.MISANTLA -> paradasMisantlaMartinez
-            Terminal.MARTINEZ -> paradasMartinezMisantla
-        }
-    }
-
-    /**
-     * Obtiene el nombre de la ruta según la terminal de salida
-     */
+    // Devuelve un nombre descriptivo para la ruta (ej. "Misantla → Martínez").
     fun obtenerNombreRuta(terminal: Terminal): String {
         return when (terminal) {
             Terminal.MISANTLA -> "Misantla → Martínez"
@@ -70,55 +38,39 @@ object RutasMisantla {
         }
     }
 
-    fun obtenerParadasPorRuta(nombreRuta: String): List<Parada> {
-        return when (nombreRuta) {
-            "Misantla - Martinez de la Torre" -> paradasMisantlaMartinez
-            "Martinez de la Torre - Misantla" -> paradasMartinezMisantla
-            else -> emptyList()
-        }
-    }
-
-    /**
-     * Obtiene la terminal de destino según la terminal de salida
-     */
+    // Devuelve la dirección de la terminal de destino según la terminal de salida.
     fun obtenerTerminalDestino(terminal: Terminal): String {
         return when (terminal) {
-            Terminal.MISANTLA -> "Martínez de la Torre"
-            Terminal.MARTINEZ -> "Misantla"
+            Terminal.MISANTLA -> DIRECCION_TERMINAL_MARTINEZ
+            Terminal.MARTINEZ -> DIRECCION_TERMINAL_MISANTLA
         }
     }
-    
-    /**
-     * Obtiene la terminal de origen según la terminal de destino
-     */
+
+    // Devuelve la dirección de la terminal de origen.
     fun obtenerTerminalOrigen(terminal: Terminal): String {
         return when (terminal) {
-            Terminal.MISANTLA -> "Misantla"
-            Terminal.MARTINEZ -> "Martínez de la Torre"
+            Terminal.MISANTLA -> DIRECCION_TERMINAL_MISANTLA
+            Terminal.MARTINEZ -> DIRECCION_TERMINAL_MARTINEZ
         }
-    }    
+    }
 }
 
+// Objeto de utilidad para gestionar los horarios de las corridas.
 object HorariosRuta {
 
-    /**
-     * Genera los horarios de salida cada 20 minutos
-     * Primera corrida: 05:00 AM
-     * Última corrida: 21:00 PM (9:00 PM)
-     */
+    // Genera la lista de horarios de salida, desde las 5:00 AM hasta las 9:00 PM, cada 20 minutos.
     fun generarHorarios(): List<String> {
         val horarios = mutableListOf<String>()
 
-        // Hora de inicio: 5:00 AM (300 minutos desde medianoche)
-        // Hora de fin: 21:00 PM (1260 minutos desde medianoche)
-        var minutosTotales = 5 * 60 // 5:00 AM
-        val minutosFin = 21 * 60    // 9:00 PM
+        val minutosInicio = 5 * 60  // 5:00 AM
+        val minutosFin = 21 * 60     // 9:00 PM
+        var minutosTotales = minutosInicio
 
         while (minutosTotales <= minutosFin) {
             val horas = minutosTotales / 60
             val minutos = minutosTotales % 60
 
-            // Formato 12 horas con AM/PM
+            // Formato de 12 horas (AM/PM)
             val periodo = if (horas < 12) "AM" else "PM"
             val hora12 = when {
                 horas == 0 -> 12
@@ -129,26 +81,19 @@ object HorariosRuta {
             val horarioFormateado = String.format("%02d:%02d %s", hora12, minutos, periodo)
             horarios.add(horarioFormateado)
 
-            // Incrementar 20 minutos
-            minutosTotales += 20
+            minutosTotales += 20 // Siguiente corrida en 20 minutos
         }
 
         return horarios
     }
 
-    /**
-     * Obtiene el horario más cercano actual o siguiente
-     */
+    //Obtiene el primer horario disponible como sugerencia
     fun obtenerHorarioSugerido(): String {
-        val horarios = generarHorarios()
-        // Por ahora retorna el primer horario disponible
-        // En producción, calcularías basado en la hora actual
-        return horarios.firstOrNull() ?: "05:00 AM"
+        // Si la lista está vacía, devuelve un valor por defecto.
+        return generarHorarios().firstOrNull() ?: "05:00 AM"
     }
 
-    /**
-     * Valida si un horario está en la lista de horarios válidos
-     */
+    // Verifica si un horario específico se encuentra en la lista de corridas válidas.
     fun esHorarioValido(horario: String): Boolean {
         return generarHorarios().contains(horario)
     }

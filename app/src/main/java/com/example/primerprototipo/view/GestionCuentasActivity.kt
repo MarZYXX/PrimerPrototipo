@@ -3,7 +3,14 @@ package com.example.primerprototipo.view
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.primerprototipo.R
@@ -31,7 +38,6 @@ class GestionCuentasActivity : AppCompatActivity() {
     private lateinit var usuarioActual: Usuario
     private var usuarioEditando: Usuario? = null
 
-    // --- Vistas para Chofer ---
     private lateinit var layoutDatosChofer: LinearLayout
     private lateinit var etNumeroLicencia: EditText
     private lateinit var etTelefonoEmergencia: EditText
@@ -86,6 +92,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         btnEliminar.isEnabled = false
     }
 
+    // Inicializar el ViewModel
     private fun initViewModel() {
         viewModel = ViewModelProvider(this)[GestionarCuentasViewModel::class.java]
 
@@ -134,7 +141,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         btnEliminar.setOnClickListener { eliminarUsuario() }
         btnFinalizar.setOnClickListener { finish() }
 
-        // CONECTAMOS EL BOTÓN DE ASIGNAR BUS
+        // Botón para asignar un Bus ID
         btnAsignarBus.setOnClickListener {
             val busId = etBusId.text.toString().trim()
             if (usuarioEditando != null && busId.isNotEmpty()) {
@@ -144,6 +151,7 @@ class GestionCuentasActivity : AppCompatActivity() {
             }
         }
 
+        // Manejar cambios en el Spinner de Roles
         spinnerRol.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val rolSeleccionado = parent?.getItemAtPosition(position) as? Role
@@ -153,6 +161,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         }
     }
 
+    // Actualizar la visibilidad de las vistas de Chofer
     private fun actualizarVisibilidadChofer(rol: Role?) {
         val esChofer = rol == Role.Chofer
         layoutDatosChofer.visibility = if (esChofer) View.VISIBLE else View.GONE
@@ -163,6 +172,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         }
     }
 
+    // Configurar el Spinner de Roles
     private fun setupSpinnerRoles(roles: List<Role>) {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, roles)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -175,6 +185,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         }
     }
 
+    // Cargar los datos del usuario en el formulario
     private fun cargarDatosUsuario(usuario: Usuario) {
         etNombre.setText(usuario.nombre)
         etApellidoPaterno.setText(usuario.apellidoPaterno)
@@ -192,6 +203,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         etContrasena.hint = "No se puede editar"
     }
 
+    // Limpiar el formulario
     private fun limpiarFormulario() {
         etNombre.setText("")
         etApellidoPaterno.setText("")
@@ -212,6 +224,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         actualizarVisibilidadChofer(spinnerRol.selectedItem as? Role)
     }
 
+    // Crear un nuevo usuario
     private fun crearUsuario() {
         val nombre = etNombre.text.toString().trim()
         val apellidoPaterno = etApellidoPaterno.text.toString().trim()
@@ -223,6 +236,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         val numeroLicencia = etNumeroLicencia.text.toString().trim()
         val telefonoEmergencia = etTelefonoEmergencia.text.toString().trim()
 
+        // Se crea el usuario con los datos del chofer
         viewModel.crearUsuario(
             nombre, apellidoPaterno, apellidoMaterno, correo,
             contrasena, rol, usuarioActual,
@@ -231,6 +245,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         )
     }
 
+    // Actualizar el usuario
     private fun actualizarUsuario() {
         val usuario = usuarioEditando ?: return
         val nombre = etNombre.text.toString().trim()
@@ -238,7 +253,7 @@ class GestionCuentasActivity : AppCompatActivity() {
         val apellidoMaterno = etApellidoMaterno.text.toString().trim()
         val rol = spinnerRol.selectedItem as Role
 
-        // --- RECOGEMOS LOS DATOS DEL CHOFER ---
+        // Se recolectan los nuevos datos del chofer
         val numeroLicencia = etNumeroLicencia.text.toString().trim()
         val telefonoEmergencia = etTelefonoEmergencia.text.toString().trim()
 
@@ -249,7 +264,7 @@ class GestionCuentasActivity : AppCompatActivity() {
             nuevoApellidoMaterno = apellidoMaterno,
             nuevoRol = rol,
             actualizador = usuarioActual,
-            // --- Y LOS PASAMOS AL VIEWMODEL ---
+            // Se pasan los nuevos datos del chofer
             numeroLicencia = numeroLicencia.takeIf { rol == Role.Chofer },
             telefonoEmergencia = telefonoEmergencia.takeIf { rol == Role.Chofer }
         )

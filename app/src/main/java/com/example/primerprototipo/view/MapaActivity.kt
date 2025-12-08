@@ -48,6 +48,7 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
         progressBar = findViewById(R.id.progressBarMapa)
         btnCerrarSesion = findViewById(R.id.closeMapSesion)
 
+        // Configurar el mapa
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
@@ -62,12 +63,15 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // Manejar el evento de que el mapa está listo
+    // Configurar el mapa
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         val misantla = LatLng(19.9319, -96.8461)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(misantla, 10f))
     }
 
+    // Configurar el Spinner
     private fun setupSpinner() {
         val rutas = Terminal.values().map { it.nombreCompleto }.toMutableList()
         rutas.add(0, "Selecciona una ruta para ver")
@@ -107,6 +111,7 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // Dibujar la ruta y las paradas en el mapa
     private fun dibujarRutaYParadas(ruta: List<LatLng>, paradas: List<com.example.primerprototipo.model.Parada>) {
         mMap.clear()
         val polylineOptions = PolylineOptions().color(Color.BLUE).width(12f).addAll(ruta)
@@ -127,6 +132,7 @@ class MapaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // Actualizar los marcadores de los autobuses
     private fun actualizarMarcadoresDeAutobuses(autobuses: List<UbicacionAutobus>) {
         val autobusIdsActuales = autobuses.map { it.autobusId }
 

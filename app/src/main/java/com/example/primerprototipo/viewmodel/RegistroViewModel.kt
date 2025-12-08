@@ -55,6 +55,7 @@ class RegistroViewModel : ViewModel() {
                 "rol" to nuevoUsuario.rol.name
             )
 
+            // Guardar el usuario en Firestore
             database.collection("usuarios").document(uid).set(usermap)
                 .addOnSuccessListener{
                     _isLoading.value = false

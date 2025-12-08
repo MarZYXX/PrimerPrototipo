@@ -17,9 +17,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.primerprototipo.R
-import com.example.primerprototipo.model.LocationForegroundService
 import com.example.primerprototipo.model.Terminal
 import com.example.primerprototipo.model.Usuario
+import com.example.primerprototipo.repository.LocationForegroundService
 import com.example.primerprototipo.viewmodel.ChoferViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -134,7 +134,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
     private fun buscarAsignacionAutobus() {
-        tvBusInfo.text = "Buscando asignación de unidad..."
+        tvBusInfo.text = "Buscando asignación de unidad."
         progressBar.visibility = View.VISIBLE
 
         db.collection("chofer de autobus").document(usuarioActual.id)
@@ -146,7 +146,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
                     tvBusInfo.text = "Unidad asignada: $busIdAsignado"
                 } else {
                     busIdAsignado = null
-                    tvBusInfo.text = "⚠ No tienes autobús asignado."
+                    tvBusInfo.text = "No tienes autobús asignado."
                     tvBusInfo.setTextColor(Color.RED)
                     spinnerTerminal.isEnabled = false
                     Toast.makeText(this, "Contacta al administrador para asignación", Toast.LENGTH_LONG).show()
@@ -216,7 +216,7 @@ class ChoferActivity : AppCompatActivity(), OnMapReadyCallback {
             when (estado) {
                 is ChoferViewModel.EstadoCarga.CARGANDO -> {
                     progressBar.visibility = View.VISIBLE
-                    tvBusInfo.text = "Cargando datos del chofer..."
+                    tvBusInfo.text = "Cargando datos del chofer."
                 }
                 is ChoferViewModel.EstadoCarga.EXITO -> {
                     progressBar.visibility = View.GONE

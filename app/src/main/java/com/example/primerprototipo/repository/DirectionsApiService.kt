@@ -1,4 +1,4 @@
-package com.example.primerprototipo.service
+package com.example.primerprototipo.repository
 
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
@@ -10,22 +10,17 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
-/**
- * Servicio para obtener rutas reales de Google Directions API
- */
+// Servicio para obtener rutas reales de Google Directions API
 object DirectionsApiService {
 
     private const val TAG = "DirectionsAPI"
     private const val BASE_URL = "https://maps.googleapis.com/maps/api/directions/json"
 
-    // ⚠️ IMPORTANTE: Reemplaza con tu API Key
-    // Esta debe ser la MISMA API Key que usas en AndroidManifest
+    // API Key para la autenticación
+
     private const val API_KEY = "AIzaSyC0ij7ZfnTiTGCQtuOZeNK8QHAQU7qXz7I"
 
-    /**
-     * Obtiene la ruta real entre origen y destino
-     * @return Lista de LatLng que forman la ruta por carretera
-     */
+    // Obtiene una ruta real entre dos puntos
     suspend fun obtenerRutaReal(
         origen: LatLng,
         destino: LatLng,
@@ -47,21 +42,19 @@ object DirectionsApiService {
                     .use { it.readText() }
 
                 val result = parsearRespuesta(response)
-                Log.d(TAG, "✅ Ruta obtenida: ${result.puntos.size} puntos")
+                Log.d(TAG, "Ruta obtenida: ${result.puntos.size} puntos")
                 result
             } else {
-                Log.e(TAG, "❌ Error HTTP: $responseCode")
+                Log.e(TAG, "Error HTTP: $responseCode")
                 RutaResult.error("Error HTTP: $responseCode")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error al obtener ruta: ${e.message}")
+            Log.e(TAG, "Error al obtener ruta: ${e.message}")
             RutaResult.error(e.message ?: "Error desconocido")
         }
     }
 
-    /**
-     * Construye la URL para la API de Directions
-     */
+    // Construye la URL para la solicitud a la API
     private fun construirURL(
         origen: LatLng,
         destino: LatLng,
@@ -81,17 +74,17 @@ object DirectionsApiService {
         }
 
         // Parámetros adicionales
-        url += "&mode=driving" // Modo conducción
-        url += "&language=es" // Idioma español
-        url += "&avoid=highways" // ✨ ¡AQUÍ ESTÁ LA MAGIA! Se evita la autopista
+        url += "&mode=driving" // Modo de transporte
+        url += "&language=es" // Idioma de la respuesta
+        url += "&avoid=highways" // Evitar autopistas
+        url += "&units=metric" // Unidades de distancia en kilómetros
+        url += "&sensor=true" // Sensor de presencia
         url += "&key=$API_KEY"
 
         return url
     }
 
-    /**
-     * Parsea la respuesta JSON de la API
-     */
+    // Parsea la respuesta JSON de la API
     private fun parsearRespuesta(jsonStr: String): RutaResult {
         try {
             val json = JSONObject(jsonStr)
@@ -131,14 +124,12 @@ object DirectionsApiService {
                 exitosa = true
             )
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error al parsear respuesta: ${e.message}")
+            Log.e(TAG, "Error al parsear respuesta: ${e.message}")
             return RutaResult.error("Error al parsear: ${e.message}")
         }
     }
 
-    /**
-     * Decodifica una polilínea codificada de Google Maps
-     */
+    // Decodifica los puntos de la polilínea
     private fun decodificarPolyline(encoded: String): List<LatLng> {
         val poly = ArrayList<LatLng>()
         var index = 0
@@ -182,9 +173,7 @@ object DirectionsApiService {
         return poly
     }
 
-    /**
-     * Resultado de una consulta de ruta
-     */
+    // Modelo de datos para el resultado de la ruta
     data class RutaResult(
         val puntos: List<LatLng> = emptyList(),
         val distanciaMetros: Int = 0,

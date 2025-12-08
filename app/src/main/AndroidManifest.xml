@@ -90,7 +90,7 @@
 
         <!-- ========== SERVICIO DE UBICACIÓN EN PRIMER PLANO ========== -->
         <service
-            android:name=".model.LocationForegroundService"
+            android:name=".repository.LocationForegroundService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />

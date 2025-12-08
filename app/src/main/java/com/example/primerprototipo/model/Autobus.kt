@@ -28,7 +28,6 @@ data class Autobus(
             false
         }
     }
-
     fun quitarPasajero(): Boolean {
         return if (pasajerosAbordo > 0) {
             pasajerosAbordo--
@@ -37,6 +36,5 @@ data class Autobus(
             false
         }
     }
-
     fun obtenerCapacidadDisponible(): Int = CAPACIDAD_MAXIMA - pasajerosAbordo
 }

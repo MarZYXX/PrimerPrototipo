@@ -35,12 +35,17 @@ class MapaViewModel : ViewModel() {
         FirebaseManager.escucharAutobusesPorRuta(RutasMisantla.obtenerNombreRuta(terminal))
 
         viewModelScope.launch {
-            val paradas = RutasMisantla.obtenerParadasPorTerminal(terminal)
-            _paradasDeLaRuta.postValue(paradas) // <-- AÑADIDO: Exponer la lista de paradas
+            // Obtiene el origen y destino de la ruta
+            val origen = RutasMisantla.obtenerTerminalOrigen(terminal)
+            val destino = RutasMisantla.obtenerTerminalDestino(terminal)
 
-            val result = DirectionsRepository.getDirections(paradas)
+            // Llama al repositorio con los nombres de las ciudades.
+            val result = DirectionsRepository.getDirections(origen, destino)
+
             result.onSuccess {
-                _rutaDibujable.postValue(it)
+                // Al tener éxito, actualiza tanto la polilínea de la ruta como la lista de paradas.
+                _rutaDibujable.postValue(it.polyline)
+                _paradasDeLaRuta.postValue(it.paradas)
             }.onFailure {
                 _mensajeError.postValue("No se pudo obtener la ruta: ${it.message}")
             }

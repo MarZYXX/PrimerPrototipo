@@ -1,10 +1,10 @@
-package com.example.primerprototipo.model
+package com.example.primerprototipo.repository
 
+import android.R
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
@@ -12,7 +12,13 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.google.android.gms.location.*
+import com.example.primerprototipo.model.UbicacionAutobus
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
 
@@ -32,12 +38,13 @@ class LocationForegroundService : Service() {
         private const val NOTIFICATION_ID = 101
     }
 
+    // Crea el servicio en primer plano y lo inicializa
     override fun onCreate() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         db = FirebaseFirestore.getInstance()
         createNotificationChannel()
-        Log.d(TAG, "✅ Servicio creado")
+        Log.d(TAG, "Servicio creado")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -45,10 +52,10 @@ class LocationForegroundService : Service() {
         autobusId = intent?.getStringExtra("AUTOBUS_ID")
         ruta = intent?.getStringExtra("RUTA_ID")
 
-        Log.d(TAG, "📍 Datos recibidos - Chofer: $choferId, Bus: $autobusId, Ruta: $ruta")
+        Log.d(TAG, "Datos recibidos - Chofer: $choferId, Bus: $autobusId, Ruta: $ruta")
 
         if (choferId == null || autobusId == null) {
-            Log.e(TAG, "❌ Faltan datos requeridos. Deteniendo servicio")
+            Log.e(TAG, "Faltan datos requeridos. Deteniendo servicio")
             stopSelf()
             return START_NOT_STICKY
         }
@@ -65,9 +72,9 @@ class LocationForegroundService : Service() {
             } else {
                 startForeground(NOTIFICATION_ID, notification)
             }
-            Log.d(TAG, "✅ Servicio iniciado en primer plano")
+            Log.d(TAG, "Servicio iniciado en primer plano")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error al iniciar servicio en primer plano: ${e.message}")
+            Log.e(TAG, "Error al iniciar servicio en primer plano: ${e.message}")
         }
 
         startLocationUpdates()
@@ -75,6 +82,7 @@ class LocationForegroundService : Service() {
         return START_STICKY
     }
 
+    // Inicia las actualizaciones de ubicación en segundo plano y las guarda en Firestore si es necesario
     private fun startLocationUpdates() {
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
@@ -88,7 +96,7 @@ class LocationForegroundService : Service() {
             override fun onLocationResult(locationResult: LocationResult) {
                 val location = locationResult.lastLocation ?: return
 
-                Log.d(TAG, "📍 Nueva ubicación: ${location.latitude}, ${location.longitude}")
+                Log.d(TAG, "Nueva ubicación: ${location.latitude}, ${location.longitude}")
 
                 val ubicacion = UbicacionAutobus(
                     autobusId = autobusId!!,
@@ -106,10 +114,10 @@ class LocationForegroundService : Service() {
                     .document(autobusId!!)
                     .set(ubicacion)
                     .addOnSuccessListener {
-                        Log.d(TAG, "✅ Ubicación actualizada en Firebase")
+                        Log.d(TAG, "Ubicación actualizada en Firebase")
                     }
                     .addOnFailureListener { e ->
-                        Log.e(TAG, "❌ Error al actualizar ubicación: ${e.message}")
+                        Log.e(TAG, "Error al actualizar ubicación: ${e.message}")
                     }
             }
         }
@@ -120,9 +128,9 @@ class LocationForegroundService : Service() {
                 locationCallback,
                 Looper.getMainLooper()
             )
-            Log.d(TAG, "✅ Actualizaciones de ubicación iniciadas")
+            Log.d(TAG, "Actualizaciones de ubicación iniciadas")
         } catch (e: SecurityException) {
-            Log.e(TAG, "❌ Error de permisos: ${e.message}")
+            Log.e(TAG, "Error de permisos: ${e.message}")
             stopSelf()
         }
     }
@@ -131,7 +139,7 @@ class LocationForegroundService : Service() {
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("GPS-BUS - Rastreo Activo")
             .setContentText(contentText)
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+            .setSmallIcon(R.drawable.ic_menu_mylocation)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .build()
@@ -147,16 +155,16 @@ class LocationForegroundService : Service() {
                 description = "Rastrea la ubicación del autobús en tiempo real"
             }
 
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
-            Log.d(TAG, "✅ Canal de notificación creado")
+            Log.d(TAG, "Canal de notificación creado")
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         fusedLocationClient.removeLocationUpdates(locationCallback)
-        Log.d(TAG, "🛑 Servicio detenido")
+        Log.d(TAG, "Servicio detenido")
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
