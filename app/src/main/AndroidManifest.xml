@@ -37,7 +37,6 @@
         tools:targetApi="31">
 
         <!-- ========== API KEY DE GOOGLE MAPS ========== -->
-        <!-- IMPORTANTE: Reemplaza YOUR_GOOGLE_MAPS_API_KEY con tu API Key real -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC0ij7ZfnTiTGCQtuOZeNK8QHAQU7qXz7I" />
