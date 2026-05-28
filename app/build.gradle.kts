@@ -4,7 +4,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.google.gms.google-services")
+    // id("com.google.gms.google-services") // Comentado para permitir el build sin google-services.json
 }
 
 // Leer la clave de API desde local.properties
@@ -69,6 +69,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.activity:activity-ktx:1.9.2")
 
+    // Nota: Las dependencias de Firebase podrían fallar en tiempo de ejecución sin el plugin y el json
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
 
     implementation("com.google.firebase:firebase-auth")
